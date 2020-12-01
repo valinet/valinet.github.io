@@ -151,18 +151,18 @@
 }
 
 .footer-col-1 {
-  width: -webkit-calc(33% - (#{$spacing-unit} / 2));
-  width:         calc(33% - (#{$spacing-unit} / 2));
+  width: -webkit-calc(37% - (#{$spacing-unit} / 2));
+  width:         calc(37% - (#{$spacing-unit} / 2));
 }
 
 .footer-col-2 {
-  width: -webkit-calc(33% - (#{$spacing-unit} / 2));
-  width:         calc(33% - (#{$spacing-unit} / 2));
+  width: -webkit-calc(26% - (#{$spacing-unit} / 2));
+  width:         calc(26% - (#{$spacing-unit} / 2));
 }
 
 .footer-col-3 {
-  width: -webkit-calc(34% - (#{$spacing-unit} / 2));
-  width:         calc(34% - (#{$spacing-unit} / 2));
+  width: -webkit-calc(37% - (#{$spacing-unit} / 2));
+  width:         calc(37% - (#{$spacing-unit} / 2));
 }
 
 @include media-query($on-laptop) {

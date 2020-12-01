@@ -63,9 +63,7 @@
 .flex-column {
     flex-direction: column !important;
 }
-.bg-white {
-    background-color: #fff !important;
-}
+
 .rounded-1 {
     border-radius: 3px !important;
 }
@@ -136,9 +134,7 @@ svg:not(:root) {
     margin-bottom: 8px !important;
 	box-sizing: border-box;
 }
-.text-gray {
-    color: #586069 !important;
-}
+
 .f6 {
     font-size: 12px !important;
 }
@@ -149,9 +145,7 @@ svg:not(:root) {
 .mr-4 {
     margin-right: 24px !important;
 }
-.link-gray {
-    color: #586069 !important;
-}
+
 .repo-language-color {
     filter: brightness(125%) !important;
     border-radius: 50%;
@@ -184,7 +178,4 @@ svg:not(:root) {
 
 .mr-3 {
     margin-right: 24px !important;
-}
-.link-gray {
-    color: #586069 !important;
 }

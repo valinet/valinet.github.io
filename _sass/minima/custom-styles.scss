@@ -1,18 +1,12 @@
-#site-logo, #site-logo[data-theme="light"] {
-	content:url("/res/logo.svg");
-}
-
 #site-logo[data-theme="dark"] {
-	content:url("/res/logo_dark.svg");
+	-webkit-filter: invert(100%);
+	filter: invert(100%);
 }
 
 @media (prefers-color-scheme: dark) {
 #site-logo, #site-logo[data-theme="dark"] {
-	content:url("/res/logo_dark.svg");
-}
-
-#site-logo[data-theme="light"] {
-	content:url("/res/logo.svg");
+	-webkit-filter: invert(100%);
+	filter: invert(100%);
 }
 }
 
@@ -374,6 +368,54 @@ html[data-theme="dark"] {
 	}
 }
 
+.bg-white, .bg-white[data-theme="light"] {
+    background-color: #ffffff;
+}
+.bg-white[data-theme="dark"] {
+    background-color: #333333;
+}
+@media (prefers-color-scheme: dark) {
+.bg-white, .bg-white[data-theme="dark"] {
+    background-color: #333333;
+}
+
+.bg-white[data-theme="light"] {
+    background-color: #ffffff;
+}
+}
+
+.link-gray {
+    color: var(--text-color) !important;
+}
+
+.text-gray {
+    color: var(--text-color);
+}
+
+.aa {
+	color: var(--link-base-color);
+}
+
+.aa:visited {
+	color: var(--link-visited-color);
+}
+
+.aa:hover {
+	color: var(--link-hover-color);
+}
+
+.invertsvg[data-theme="dark"] {
+	-webkit-filter: invert(100%);
+    filter: invert(100%);
+}
+
+@media (prefers-color-scheme: dark) {
+.invertsvg, .invertsvg[data-theme="dark"] {
+	-webkit-filter: invert(100%);
+    filter: invert(100%);
+}
+}
+
 @import
 	"repo-card.scss"
 ;
@@ -391,10 +433,6 @@ img[src*="#circle"] {
     border-bottom-right-radius: 3px;
 }
 
-.aa:visited {
-    color: #1756a9;
-	text-decoration: none;
-}
 .pagination a, .pagination span, .pagination em {
     position: relative;
     float: left;
@@ -411,19 +449,8 @@ img[src*="#circle"] {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    background: #fff;
-    border: 1px solid #e1e4e8;
-}
-.aa {
-    color: #2a7ae2;
-    text-decoration: none;
-}
-.aa {
-    color: #0366d6;
-    text-decoration: none;
-}
-.aa {
-    background-color: transparent;
+    background: var(--background-color);
+    border: 1px solid var(--border-color-01);
 }
 
 #site-logo {
