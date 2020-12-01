@@ -590,8 +590,6 @@ Web site: www.valinet.ro
 
 ## E. Footnotes
 
-------
-
 [^1]: <https://store.arduino.cc/arduino-nano>
 
 [^2]: <https://www.microchip.com/wwwproducts/en/ATmega328>
