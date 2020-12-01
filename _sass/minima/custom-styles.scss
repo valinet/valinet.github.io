@@ -384,6 +384,25 @@ html[data-theme="dark"] {
 }
 }
 
+.mr-3 {
+	color: var(--text-color) !important;
+}
+
+.border,.border[data-theme="light"] {
+    border: 1px #e1e4e8 solid;
+}
+.border[data-theme="dark"] {
+	border: 1px var(--border-color-01) solid;
+}
+@media (prefers-color-scheme: dark) {
+.border,.border[data-theme="dark"] {
+	border: 1px var(--border-color-01) solid;
+}
+.border[data-theme="light"] {
+    border: 1px #e1e4e8 solid;
+}
+}
+
 .link-gray {
     color: var(--text-color) !important;
 }
