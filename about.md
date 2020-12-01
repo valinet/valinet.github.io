@@ -2,6 +2,7 @@
 layout: page
 title: About
 permalink: /about/
+comments: true
 ---
 
 ![Avatar](https://github.com/valinet.png?size=200#circle)
