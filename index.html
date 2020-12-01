@@ -1,0 +1,80 @@
+---
+# Feel free to add content and custom Front Matter to this file.
+# To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
+
+layout: home
+title: Hello
+list_title: Articles
+---
+
+<div class="home">
+  {{ site.description }}
+
+  <br/><br/>
+
+  <!-- <br/><p>An overview of my projects is available <a href="/projects">here</a>.</p> -->
+  
+  <!-- <h1>Latest projects</h1> -->
+  
+  <div class="d-sm-flex flex-wrap gutter-condensed mb-4">
+    {% assign sort_order = 'pushed_at' %}
+
+    {% if site.projects.exclude.archived and site.projects.exclude.forks %}
+	  {% assign filtered_repos = site.github.public_repositories | where:'archived', false | where:'fork', false | sort: sort_order | reverse %}
+    {% elsif site.projects.exclude.archived %}
+	  {% assign filtered_repos = site.github.public_repositories | where:'archived', false | sort: sort_order | reverse %}
+    {% elsif site.projects.exclude.forks %}
+	  {% assign filtered_repos = site.github.public_repositories | where:'fork', false | sort: sort_order | reverse %}
+    {% else %}
+	  {% assign filtered_repos = site.github.public_repositories | sort: sort_order | reverse %}
+    {% endif %}
+
+    {% for repository in filtered_repos limit: site.projects.limit %}
+	  {% unless site.projects.exclude.projects contains repository.name %}
+	    <div class="col-sm-6 col-md-12 col-lg-6 col-xl-4 mb-3">
+		  {% include repo-card.html %}
+	    </div>
+	  {% endunless %}
+    {% endfor %}
+  </div>
+  
+  <!-- <h1>{{ page.list_title | default: "Posts" }}</h1> -->
+  <ul class="post-list">
+  {%- for post in paginator.posts -%}
+    <li>
+	  {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+	  <span class="post-meta">{{ post.date | date: date_format }}</span>
+	  <h3>
+	    <a class="post-link" href="{{ post.url | relative_url }}">
+		  {{ post.title | escape }}
+	    </a>
+	  </h3>
+	  {%- if site.show_excerpts -%}
+	    {{ post.excerpt }}
+  	  {%- endif -%}
+    </li>
+  {%- endfor -%}
+  </ul>
+
+  <!-- Pagination links -->
+  <div class="pagination">
+    {% if paginator.previous_page %}
+	  <a href="{{ paginator.previous_page_path }}" class="previous">
+	    <
+	  </a>
+    {% else %}
+	  <span class="previous"><</span>
+    {% endif %}
+    <span class="page_number ">
+      Page {{ paginator.page }} of {{ paginator.total_pages }}
+    </span>
+    {% if paginator.next_page %}
+	  <a href="{{ paginator.next_page_path }}" class="next">
+	    >
+	  </a>
+    {% else %}
+	  <span class="next ">></span>
+    {% endif %}
+  </div>
+  
+</div>

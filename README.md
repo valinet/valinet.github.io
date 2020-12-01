@@ -1,2 +1,3 @@
-# valinet.github.io
-Source code for valinet.ro.
+## valinet.ro
+
+This is the source code for the valinet.ro web site.

@@ -1,0 +1,61 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely edit after that. If you find
+# yourself editing this file very often, consider using Jekyll's data files
+# feature for the data you need to update frequently.
+#
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+# These are used to personalize your new site. If you look in the HTML files,
+# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
+# You can create any custom variable you would like, and they will be accessible
+# in the templates via {{ site.myvariable }}.
+title: valinet
+name: Valentin-Gabriel Radu
+author: Valentin-Gabriel Radu
+email: valentingabrielradu@gmail.com
+legal: Copyright &copy; 2006-2021 VALINET Solutions SRL. All rights reserved.
+description: >- # this means to ignore newlines until "baseurl:"
+  My name is Valentin-Gabriel Radu and I am an engineer that's passionate about 
+  computers, embedded devices, software and hacking. I created this web site 
+  so that I can share my knowledge on various topics with the world, exchange
+  ideas, and receieve feedback. Read more about who I am 
+  <a href="/about">here</a>.
+baseurl: "/" # the subpath of your site, e.g. /blog
+url: "https://valinet.ro" # the base hostname & protocol for your site, e.g. http://example.com
+github_username: valinet
+header_pages:
+  - about.md
+paginate: 8
+paginate_path: "/:num/"
+show_excerpts: true
+disqus:
+  shortname: valinet
+projects:
+  limit: 6
+  exclude:
+    archived: false
+    forks: true
+    # - repo-name
+
+# Build settings
+markdown: kramdown
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-octicons
+
+# Exclude from processing.
+# The following items will not be processed, by default. Create a custom list
+# to override the default setting.
+# exclude:
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/
