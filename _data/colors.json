@@ -171,6 +171,10 @@
         "color": null,
         "url": "https://github.com/trending?l=CartoCSS"
     },
+	"SCSS": {
+        "color": "#dfa535",
+        "url": "https://github.com/trending?l=CartoCSS"
+    },
     "Ceylon": {
         "color": "#dfa535",
         "url": "https://github.com/trending?l=Ceylon"

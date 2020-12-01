@@ -1,14 +1,34 @@
-/**
- * Syntax highlighting styles
- */
+@charset "utf-8";
+
+$brand-color:           var(--brand-color);
+$brand-color-light:     var(--brand-color-light);
+$brand-color-dark:      var(--brand-color-dark);
+
+$site-title-color:      var(--site-title-color);
+
+$text-color:            var(--text-color);
+$background-color:      var(--background-color);
+$code-background-color: var(--code-background-color);
+
+$link-base-color:       var(--link-base-color);
+$link-visited-color:    var(--link-visited-color);
+$link-hover-color:      var(--link-hover-color);
+
+$border-color-01:       var(--border-color-01);
+$border-color-02:       var(--border-color-02);
+$border-color-03:       var(--border-color-03);
+
+$table-text-color:      var(--table-text-color);
+$table-zebra-color:     var(--table-zebra-color);
+$table-header-bg-color: var(--table-header-bg-color);
+$table-header-border:   var(--table-header-border);
+$table-border-color:    var(--table-border-color);
+
+
+// Syntax highlighting styles should be adjusted appropriately for every "skin"
+// ----------------------------------------------------------------------------
+
 .highlight {
-  background: #fff;
-  @extend %vertical-rhythm;
-
-  .highlighter-rouge & {
-    background: #eef;
-  }
-
   .c     { color: #998; font-style: italic } // Comment
   .err   { color: #a61717; background-color: #e3d2d2 } // Error
   .k     { font-weight: bold } // Keyword
