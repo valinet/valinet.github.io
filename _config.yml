@@ -37,10 +37,12 @@ show_excerpts: true
 disqus:
   shortname: valinet
 projects:
-  limit: 6
+  limit: 7
   exclude:
     archived: false
     forks: true
+    projects:
+    - valinet.github.io
     # - repo-name
 
 # Build settings
