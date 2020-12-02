@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "How I exported my text messages from Windows Phone to Android"
-date:   2015-07-01 00:00:00 +0200
+date:   2015-07-01 00:00:00 +0000
 categories: 
 excerpt: As you may be aware, Windows Phone did not offer a way to take your messages out of the “Microsoft Cloud”, or out of the phone, in order to store a backup of them or to import them to some other phone. This was true, until a couple of days ago. [...]
 ---

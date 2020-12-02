@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Example of x64 RunPE"
-date:   2020-09-06 00:00:00 +0200
+date:   2020-09-06 00:00:00 +0000
 categories: 
 excerpt: Shows how to embed the code of another executable in a binary and execute it at runtime directly from memory (without extracting to disk etc). Deinitely a classic, guaranteed to work on amd64.
 ---
@@ -34,6 +34,7 @@ Licensed under MIT.
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
     
+
     -----
     Compile using (make sure to use x64 cl):
     cl runpe64.cpp

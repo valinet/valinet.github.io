@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Get browser forward gesture on Android 10 Pixel Experience Plus ROM for Poco F1"
-date:   2020-06-16 00:00:00 +0200
+date:   2020-06-16 00:00:00 +0000
 categories: 
 excerpt: Android 10 includes a new system of gesture navigation that mimicks the iPhone. But contrary to the iPhone, swyping from the right edge of the screen always goes back one screen, whereas in the browser it would be more useful to navigate forward. Read on to find out how to tweak this behavior, by binary patching Android system files.
 ---

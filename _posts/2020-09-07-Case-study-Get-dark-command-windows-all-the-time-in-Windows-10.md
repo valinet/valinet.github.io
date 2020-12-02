@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Case study: Get dark command windows all the time in Windows 10"
-date:   2020-09-07 00:00:00 +0200
+date:   2020-09-07 00:00:00 +0000
 categories: 
 excerpt: If you use the light system theme in Windows 10, command windows usually have a dark background with a white titlebar, which totally kills your eyes no matter the time of the day. This articles shows you how to determine a binary patch for the system file responsible for this.
 ---

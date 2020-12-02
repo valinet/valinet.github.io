@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "ThinkPad W540 review"
-date:   2015-09-22 00:00:00 +0200
+date:   2015-09-22 00:00:00 +0000
 categories: 
 excerpt: This piece is… well, I don’t remember quite the same sentence again. I have already written the introduction to this review, didn’t save, put the laptop to sleep, went to wash some dishes, then came back, woke it up from sleep, and boom, there you have it [...]
 ---

@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Fix Task Manager blurriness on different DPI monitors in Windows 10"
-date:   2020-09-06 00:00:00 +0200
+date:   2020-09-06 00:00:00 +0000
 categories: 
 excerpt: In Windows 10, the Task Manager is blurry when show on secondary monitors if they have a different DPI from the primary monitor. This article shows you how to fix that.
 ---

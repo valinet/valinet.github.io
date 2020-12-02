@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Why am I leaving the Windows Phone platform for good today"
-date:   2015-06-17 00:00:00 +0200
+date:   2015-06-17 00:00:00 +0000
 categories: 
 excerpt: Unfortunately as it may sound, today is the day I decided not to take the Windows Phone (or Windows 10 Mobile, or Windows Mobile, or whatever Microsoft decides to call the OS) route, and in this piece, I am going to deeply describe why I decided to do so. [...]
 ---

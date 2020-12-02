@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "homepi+ Documentation"
-date:   2020-12-01 00:00:00 +0200
+date:   2020-12-01 00:00:00 +0000
 categories: 
 excerpt: homepi+ is an Arduino based implementation of a home appliance control system. It interfaces and communicates with various hardware devices in order to provide a single point of control for all of them. It is used to control all the electric and electronic equipment in my study room, from light fixtures to computers and laptops. The user interacts with the service using a simple web application which is accessible from any device which has a web browser, so pretty much any modern smart device, and can control it not only from the local network, but also from the larger Internet using a robust and secure security mechanism.
 ---

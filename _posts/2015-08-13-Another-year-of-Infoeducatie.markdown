@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Another year of Infoeducatie"
-date:   2015-08-13 00:00:00 +0200
+date:   2015-08-13 00:00:00 +0000
 categories: 
 excerpt: I have got the flu for the past week or so, so that’s the reason I only write about this today. Last week (2-8 of August, 2015) the 21st edition of the InfoEducatie contest took place in the Galaciuc Youth camp, located 60 km away from the county seat of Vrancea, the city of Focsani. [...]
 ---

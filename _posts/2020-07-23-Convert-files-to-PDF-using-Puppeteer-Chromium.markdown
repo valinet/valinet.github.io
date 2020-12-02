@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Convert files to PDF using Puppeteer (Chromium)"
-date:   2020-09-06 00:00:00 +0200
+date:   2020-09-06 00:00:00 +0000
 categories: 
 excerpt: This example shows how to convert various file types to pdf using the built-in 'Save to PDF' feature from Chromium. This is needlessly too complicated because Google decided to crap out the command line of the browser.
 ---
