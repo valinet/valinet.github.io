@@ -21,7 +21,7 @@ We definitely do not like such an approach. For once, we believe that the applic
 
 Then, during your visit, should the application need your permission to store/access data on your device that could be used to personally identify you, it will ask for your consent. Even if you decline the request, the application will still work great. All functionality that requires data to be stored on your local device is non-essential and provides enhanced features, like the comments system. Reading the articles on the web site is free as in free speech and will always be, without the need of any agent to identify you or access your personal data.
 
-Also, many people are familiar with how the law requires individuals to consent for the so-called cookie usage. That's not true. Consent is required for using (accessing) the user's personal data, no matter the technology it resides in. Cookies are a form of storing user data on the local device, but not the only one. A lot of web sites claim to be cookie-free and to comply with the law, while they still cheat and access data they store on the local device via the use of functionality such as the "local storage" of the web browser. That's why we avoid taking here about cookies. This section is about data we may store on your device that we would like to access in the future and that can be used to identify you, for example, during your subsequent visits on the web site, no matter the actual technology we use to store it on your device (for what is worth, we use plain old cookies when you allow us to do so).
+Also, many people are familiar with how the law requires individuals to consent for the so-called cookie usage. That's not true. Consent is required for using (accessing) the user's personal data, no matter the technology it resides in. Cookies are a form of storing user data on the local device, but not the only one. A lot of web sites claim to be cookie-free and to comply with the law, while they still cheat and access data they store on the local device via the use of functionality such as the "local storage" of the web browser. That's why we avoid talking here about cookies specifically. This section is about data we may store on your device that we or the third party services we employ would like to access in the future and that can be used to identify you, for example, during your subsequent visits on the web site, no matter the actual technology we or the third party services we employ use to store it on your device (for what is worth, we use plain old cookies when you allow us to do so).
 
 Data stored on your device by the application can be stored by us, the developer (first party), or by third party services used by the application.
 
@@ -47,8 +47,8 @@ Below, we describe every setting (*cookie*) the application may request to set a
 
 ### Third party
 
-* Display of YouTube embedded videos. We need your consent to display videos that may be embedded in articles because YouTube subsequently stores identifiers on your device that can be used to identify you. They do these for various purposes, for example, so that they know whether you are logged in and in such case, show you relevant video recommendation videos instead of generic ones. To learn more about how YouTube processes your personal data, locally and/or remotely, check out their [Terms of Service](https://www.youtube.com/static?template=terms) or Google's [Privacy Policy](https://policies.google.com/privacy?hl=en-US).
-* Display of Disqus comments functionality. We need your consent to display the comments section which is powered by Disqus because Disqus subsequently stores identifiers on your device that can be used to identify you. For more information about how Disqus processes your personal data, locally and/or remotely, check out their [Privacy Policy](https://help.disqus.com/en/articles/1717103-disqus-privacy-policy).
+* Display of YouTube embedded videos. We need your consent to display videos that may be embedded in articles because YouTube subsequently stores data on your device that can be used to identify you. They do this for various purposes, for example, so that they know whether you are logged in to their service and in such case, show you relevant video recommendations instead of generic ones. To learn more about how YouTube processes your personal data, locally and/or remotely, check out their [Terms of Service](https://www.youtube.com/static?template=terms) or Google's [Privacy Policy](https://policies.google.com/privacy?hl=en-US).
+* Display of Disqus comments functionality. We need your consent to display the comments section which is powered by Disqus because Disqus subsequently stores data on your device that can be used to identify you. For more information about how Disqus processes your personal data, locally and/or remotely, check out their [Privacy Policy](https://help.disqus.com/en/articles/1717103-disqus-privacy-policy).
 
 ## Third party services used by this application
 
@@ -56,11 +56,11 @@ Below is the list of third party services this application may use services from
 
 * [YouTube](https://youtube.com) - we use YouTube to display inline videos in articles
 * [Disqus](https://disqus.com) - we use Disqus to provide the comments section for each article
-* [GitHub](https://github.com) - GitHub is used as hosting for the application; also, we use their service to provide information about Git repositories we store with their service
+* [GitHub](https://github.com) - GitHub is used as hosting for the application; also, we use their service to provide information about Git repositories we store with their service.
 
 ## Others
 
 The following functionality requires that you enable JavaScript in your browser:
 
-* Cookies
+* Cookie management
 * Comments (Disqus)
