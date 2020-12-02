@@ -1,0 +1,91 @@
+---
+layout: page
+title: Settings
+comments: false
+---
+
+<div>
+
+Manage consent for services that may collect data. Learn more about how these services may affect your privacy in our <a href="/privacy">Personal data policy</a> document.<br>
+Settings are saved automatically.
+<br><br>
+
+<div>
+<h2>Theme</h2>
+<p>The web site infers a suitable theme based on the settings specified by your browser. Use this to override the default.</p>
+<select name="theme_s" id="theme_s" onchange="theme_c();">
+  <option value="">Default (Use browser setting)</option>
+  <option value="0">Light</option>
+  <option value="1">Dark</option>
+</select>
+</div>
+
+<br>
+
+<div>
+<h2>Displaying YouTube videos in articles</h2>
+<p>Some pages of this web site may embed videos from YouTube.</p>
+<select name="youtube_s" id="youtube_s" onchange="youtube_c();">
+  <option value="">Default (Ask for authorization)</option>
+  <option value="1">Allow</option>
+  <option value="0">Deny</option>
+</select>
+</div>
+
+<br>
+
+<div>
+<h2>Viewing and making comments</h2>
+<p>The comments section on this web site is powered by Disqus.</p>
+<select name="comments_s" id="comments_s" onchange="comments_c();">
+  <option value="">Default (Ask for authorization)</option>
+  <option value="1">Allow</option>
+  <option value="0">Deny</option>
+</select>
+</div>
+
+<script>	
+	function theme_c()
+	{
+	  var v = document.getElementById("theme_s").value;
+	  setCookie("valinet_theme", v, 365);
+	  
+	  const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+	  
+	  if (v == "" && userPrefersDark)
+	  {
+		document.documentElement.setAttribute('data-theme', 'dark');
+	  }
+	  else if (v == "")
+	  {
+	    document.documentElement.setAttribute('data-theme', 'light');
+	  }
+	  else if (v == "1")
+	  {
+	    document.documentElement.setAttribute('data-theme', 'dark');
+	  }
+	  else if (v == "0")
+	  {
+	    document.documentElement.setAttribute('data-theme', 'light');
+	  }
+	}
+	
+	function youtube_c()
+	{
+	  setCookie("valinet_youtube_enabled", document.getElementById("youtube_s").value, 365);
+	}
+
+	
+	function comments_c()
+	{
+	  setCookie("valinet_comments_enabled", document.getElementById("comments_s").value, 365);
+	}
+	
+	(function() {
+	  document.getElementById("theme_s").value = getCookie("valinet_theme");
+	  document.getElementById("youtube_s").value = getCookie("valinet_youtube_enabled");
+	  document.getElementById("comments_s").value = getCookie("valinet_comments_enabled");
+    })();
+</script>
+
+</div>

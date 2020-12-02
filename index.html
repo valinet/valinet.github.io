@@ -3,12 +3,15 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: home
-title: Hello
 list_title: Articles
 ---
 
 <div class="home">
-  {{ site.description }}
+  {% if page.url == "/" %}
+  
+  <h1>Hi</h1>
+
+  {{ site.description_long }}
 
   <br/><br/>
 
@@ -37,6 +40,12 @@ list_title: Articles
 	  {% endunless %}
     {% endfor %}
   </div>
+  
+  {% else %}
+  
+    <br/>
+  
+  {% endif %}
   
   <!-- <h1>{{ page.list_title | default: "Posts" }}</h1> -->
   <ul class="post-list">

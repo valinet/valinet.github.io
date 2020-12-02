@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Personal data policy
-permalink: /policy/
+title: Privacy policy
+permalink: /privacy/
 comments: true
 ---
 
@@ -23,11 +23,19 @@ Then, during your visit, should the application need your permission to store/ac
 
 Also, many people are familiar with how the law requires individuals to consent for the so-called cookie usage. That's not true. Consent is required for using (accessing) the user's personal data, no matter the technology it resides in. Cookies are a form of storing user data on the local device, but not the only one. A lot of web sites claim to be cookie-free and to comply with the law, while they still cheat and access data they store on the local device via the use of functionality such as the "local storage" of the web browser. That's why we avoid taking here about cookies. This section is about data we may store on your device that we would like to access in the future and that can be used to identify you, for example, during your subsequent visits on the web site, no matter the actual technology we use to store it on your device (for what is worth, we use plain old cookies when you allow us to do so).
 
-Data stored on your device by the application can be stored by us, the developer (first party), or by third party services used by the application. 
+Data stored on your device by the application can be stored by us, the developer (first party), or by third party services used by the application.
+
+Each time your consent is required, a banner similar to the one below will be displayed:
+
+<p class="gdpr-banner">Please authorize this web site to access the following service: Example Service. This may share your personal data with the service provider. <a class="gdpr-a" href="/policy">Learn more</a><br><a href="#_____" onclick="" class="gdpr-a">Authorize</a> <a href="#_____" onclick="" class="gdpr-a">Dismiss</a></p>
+
+By clicking *Authorize*, you consent to the application connecting automatically (now, and in the future) to the service provider and agree with its terms of service. You can subsequently revoke the permission by changing the preference in [settings](/settings) to "Default" or "Deny".
+
+By clicking *Dismiss*, the functionality will be disabled. Additional information might be shown, depending on the nature of the function that was disabled. You can subsequently permit the request by changing the preference in [settings](/settings) to "Allow".
 
 ## About the personal data stored remotely
 
-When it comes to first party data stored on your device, it never leaves your device, we never store/access personal information and we never do any remote processing on it. On the other hand, third party services treat your data per their terms of service and/or their privacy policy. Because of this, in order to protect your privacy, we are required to inform you when the application will enable a third party module that may do so and ask you whether you're okay with it or not. If you consent, we will store that choice as a cookie so that we remember it for later. As mentioned, consent for each particular choice can be withdrawn at any time in the application settings.
+When it comes to first party data stored on your device, it never leaves your device, we never store/access personal information and we never do any remote processing on it. On the other hand, third party services treat your data per their terms of service and/or their privacy policy. Because of this, in order to protect your privacy, we are required to inform you when the application will enable a third party module that may do so and ask you whether you're okay with it or not. If you consent, we will store that choice as a cookie so that we remember it for later. As mentioned, consent for each particular choice can be withdrawn at any time in the application [settings](/settings).
 
 ## List of settings
 
@@ -49,3 +57,10 @@ Below is the list of third party services this application may use services from
 * [YouTube](https://youtube.com) - we use YouTube to display inline videos in articles
 * [Disqus](https://disqus.com) - we use Disqus to provide the comments section for each article
 * [GitHub](https://github.com) - GitHub is used as hosting for the application; also, we use their service to provide information about Git repositories we store with their service
+
+## Others
+
+The following functionality requires that you enable JavaScript in your browser:
+
+* Cookies
+* Comments (Disqus)

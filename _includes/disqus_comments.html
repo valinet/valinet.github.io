@@ -1,0 +1,56 @@
+{%- if page.comments != false -%}
+  <div id="disqus_thread"></div>
+  <script>  
+    var disqus_config = function () {
+      this.page.url = '{{ page.url | absolute_url }}';
+      this.page.identifier = '{{ page.url | absolute_url }}';
+    };
+	
+	function setup_disqus()
+	{
+		var d = document;
+		var s = d.createElement('script');
+
+		s.src = 'https://{{ site.disqus.shortname }}.disqus.com/embed.js';
+
+		s.setAttribute('data-timestamp', +new Date());
+		(d.head || d.body).appendChild(s);
+	}
+	
+	function setup_dismissed()
+	{
+	document.getElementById("disqus_thread").innerHTML = 'Comments are disabled according to your privacy settings. <a href="/settings">Manage Settings</a>';
+	}
+	
+	function reject_disqus()
+	{
+		setCookie("valinet_comments_enabled", "0", 365);
+		setup_dismissed();
+		return false;
+	}
+	
+	function authorize_disqus()
+	{
+		setCookie("valinet_comments_enabled", "1", 365);
+		setup_disqus();
+		return false;
+	}
+
+    (function() {
+	  if (getCookie("valinet_comments_enabled") == "1")
+	  { 
+		setup_disqus();
+	  }
+	  else if (getCookie("valinet_comments_enabled") == "0")
+	  {
+	    setup_dismissed();
+	  }
+	  else
+	  {
+		document.getElementById("disqus_thread").innerHTML = 
+		'<p class="gdpr-banner">To view or make comments, please authorize this web site to connect to the Disqus service. This may share your personal data with the service provider. <a class="gdpr-a" href="/privacy">Learn more</a><br><a href="#_____" onclick="authorize_disqus()" class="gdpr-a">Authorize</a> <a href="#_____" onclick="reject_disqus()" class="gdpr-a">Dismiss</a></p>';
+	  }
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus</a>.</noscript>
+{%- endif -%}
