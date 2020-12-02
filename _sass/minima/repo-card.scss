@@ -22,21 +22,21 @@
     margin-bottom: 16px !important;
 	box-sizing: border-box;
 }
-@media (min-width: 1280px){
-.col-xl-4 {
-    width: 33.33333%;
-}}
-@media (min-width: 1012px){
-.col-lg-6 {
+@media (min-width: 544px){
+.col-sm-6 {
     width: 50%;
 }}
 @media (min-width: 768px){
 .col-md-12 {
     width: 100%;
 }}
-@media (min-width: 544px){
-.col-sm-6 {
+@media (min-width: 1012px){
+.col-lg-6 {
     width: 50%;
+}}
+@media (min-width: 1280px){
+.col-xl-4 {
+    width: 33.33333%;
 }}
 .github-component {
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Noto Color Emoji !important;
