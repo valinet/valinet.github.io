@@ -1,54 +1,57 @@
-{%- if page.comments != false -%}
-<div id="{{ include.id }}"></div>
-  <script>  
-	function setup_youtube()
-	{
-		var d = document.getElementById("{{ include.id }}");
-		d.innerHTML = "";
-		var s = document.createElement('iframe');
-		s.setAttribute("frameborder", "0");
-		s.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-		s.setAttribute("allowfullscreen", "");
-		s.src = "https://www.youtube.com/embed/{{ include.id }}";
-		s.width = {{ include.width }};
-		s.height = {{ include.height }};
-		d.appendChild(s);
-	}
-	
-	function setup_youtube_dismissed()
-	{
-	document.getElementById("{{ include.id }}").innerHTML = 'Embedded videos from YouTube are disabled according to your privacy settings. <a href="/settings">Manage Settings</a> or <a href="https://www.youtube.com/watch?v={{ include.id }}" target="_blank">View on YouTube.com</a>';
-	}
-	
-	function reject_youtube()
-	{
-		setCookie("valinet_youtube_enabled", "0", 365);
-		setup_youtube_dismissed();
-		return false;
-	}
-	
-	function authorize_youtube()
-	{
-		setCookie("valinet_youtube_enabled", "1", 365);
-		setup_youtube();
-		return false;
-	}
+{::options parse_block_html="false" /}
+<div id="{{ include.id }}" class="youtube-embed"></div>
+<script>  
+function setup_youtube_{{ include.id }}()
+{
+	var d = document.getElementById("{{ include.id }}");
+	d.innerHTML = "";
+	var s = document.createElement('iframe');
+	s.setAttribute("frameborder", "0");
+	s.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+	s.setAttribute("allowfullscreen", "");
+	s.src = "https://www.youtube.com/embed/{{ include.id }}";
+	s.width = {{ include.width }};
+	s.height = {{ include.height }};
+	d.appendChild(s);
+}
 
-    (function() {
-	  if (getCookie("valinet_youtube_enabled") == "1")
-	  { 
-		setup_youtube();
-	  }
-	  else if (getCookie("valinet_youtube_enabled") == "0")
-	  {
-	    setup_youtube_dismissed();
-	  }
-	  else
-	  {
-		document.getElementById("{{ include.id }}").innerHTML = 
-		'<p class="gdpr-banner">To view YouTube embedded videos, please authorize this web site to connect to YouTube. This may share your personal data with the service provider. <a class="gdpr-a" href="/privacy">Learn more</a><br><a href="#_____" onclick="authorize_youtube()" class="gdpr-a">Authorize</a> <a href="#_____" onclick="reject_youtube()" class="gdpr-a">Dismiss</a></p>';
-	  }
-    })();
-  </script>
-  <noscript>Please enable JavaScript to view embedded videos. Alternatively, <a href="https://www.youtube.com/embed/{{ include.id }}" target="_blank">view on YouTube</a>.</noscript>
-{%- endif -%}
+function setup_youtube_dismissed_{{ include.id }}()
+{
+document.getElementById("{{ include.id }}").innerHTML = 
+'<p class="gdpr-banner">Embedded videos from YouTube are disabled according to your privacy settings. <a href="/settings">Manage Settings</a> or <a href="https://www.youtube.com/watch?v={{ include.id }}" target="_blank">View on YouTube.com</a></p>';
+}
+
+function reject_youtube_{{ include.id }}()
+{
+	setCookie("valinet_youtube_enabled", "0", 365);
+	setup_youtube_dismissed_{{ include.id }}();
+	return false;
+}
+
+function authorize_youtube_{{ include.id }}()
+{
+	setCookie("valinet_youtube_enabled", "1", 365);
+	setup_youtube_{{ include.id }}();
+	return false;
+}
+
+(function() {
+  if (getCookie("valinet_youtube_enabled") == "1")
+  { 
+	setup_youtube_{{ include.id }}();
+  }
+  else if (getCookie("valinet_youtube_enabled") == "0")
+  {
+	setup_youtube_dismissed_{{ include.id }}();
+  }
+  else
+  {
+	document.getElementById("{{ include.id }}").innerHTML = 
+	'<p class="gdpr-banner">To view YouTube embedded videos, please authorize this web site to connect to YouTube. This may share your personal data with the service provider. <a class="gdpr-a" href="/privacy">Learn more</a><br><a href="#_____" onclick="authorize_youtube_{{ include.id }}()" class="gdpr-a">Authorize</a> <a href="#_____" onclick="reject_youtube_{{ include.id }}()" class="gdpr-a">Dismiss</a></p>';
+  }
+})();
+</script>
+<noscript>
+Please enable JavaScript to view embedded videos. Alternatively, <a href="https://www.youtube.com/embed/{{ include.id }}" target="_blank">view on YouTube</a>.
+</noscript>
+{::options parse_block_html="true" /}
