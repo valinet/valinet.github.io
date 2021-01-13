@@ -18,7 +18,7 @@ function setup_youtube_{{ include.id }}()
 function setup_youtube_dismissed_{{ include.id }}()
 {
 document.getElementById("{{ include.id }}").innerHTML = 
-'<p class="gdpr-banner">Embedded videos from YouTube are disabled according to your privacy settings. <a href="/settings">Manage Settings</a> or <a href="https://www.youtube.com/watch?v={{ include.id }}" target="_blank">View on YouTube.com</a></p>';
+'<p class="gdpr-banner">Embedded videos from YouTube are disabled according to your privacy settings. <a href="/settings" class="gdpr-a">Manage Settings</a> or <a href="https://www.youtube.com/watch?v={{ include.id }}" class="gdpr-a" target="_blank">View on YouTube.com</a></p>';
 }
 
 function reject_youtube_{{ include.id }}()
