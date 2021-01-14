@@ -120,7 +120,7 @@ dkms install -m ${pkgname} -v ${pkgver}
 echo Installation succeeded.
 {% endhighlight %}
 
-The script above downloads the files in the appropiate directory, and then uses the DKMS to build and install the module. Then, what you have to do, in order to mount an NTFS partition using this drive, is to explicitly specify the type when issuing the mount command, like so:
+The script above downloads the files in the appropiate directory, and then uses the DKMS to build and install the module. Then, what you have to do, in order to mount an NTFS partition using this driver, is to explicitly specify the type when issuing the mount command, like so:
 
 ```
 # mount -t ntfs3 /dev/sdb1 /mnt
