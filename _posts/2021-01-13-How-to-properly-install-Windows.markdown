@@ -3,7 +3,7 @@ layout: post
 title:  "How to properly install Windows"
 date:   2021-01-13 00:00:00 +0000
 categories: 
-excerpt: "What do I mean by the title, you ask. Like, simple, Google 'windows 10', click the first result, change user agent of the browser to some other OS, Microsoft will finally let you download an ISO, download the ISO, use Rufus to burn it into some USB drive and install off that, right? Well, not exactly. I mean, that's fine, but what to do when you have multiple computers to install on? For example, I have a desktop at home, a workstation at work, and a laptop. I basically need the same setup on all of them, and that includes the same settings, plus quite a few programs [...]"
+excerpt: "What do I mean by the title, you ask. Like, simple, Google 'windows 10', click the first result, change user agent of the browser to some other OS, Microsoft will finally let you download an ISO, download the ISO, use Rufus to burn it into some USB drive and install off that, right? Well, not exactly. I mean, that's fine, but what to do when you have multiple computers to install on? For example, I have a desktop at home, a workstation at work, and a laptop. I basically need the same setup on all of them, and that includes the same settings, plus quite a few programs."
 ---
 
 What do I mean by the title, you ask. Like, simple, Google "windows 10", click the first result, change user agent of the browser to some other OS, Microsoft will finally let you download an ISO, download the ISO, use [Rufus](https://rufus.ie) to burn it into some USB drive and install off that, right?
