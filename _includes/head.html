@@ -37,12 +37,22 @@
 	  if (v == "1")
 	  {
 		setCookie("valinet_theme", "0", 365);
+		var elems = document.getElementsByClassName('highlight');
+		for (var i = 0; i < elems.length; i = i + 1)
+		{
+			elems[i].setAttribute('data-theme', 'light');
+		}
 	    document.documentElement.setAttribute('data-theme', 'light');
 		return;
 	  }
 	  else if (v == "0")
 	  {
 	    setCookie("valinet_theme", "1", 365);
+		var elems = document.getElementsByClassName('highlight');
+		for (var i = 0; i < elems.length; i = i + 1)
+		{
+			elems[i].setAttribute('data-theme', 'dark');
+		}
 	    document.documentElement.setAttribute('data-theme', 'dark');
 		return;
 	  }
@@ -52,28 +62,48 @@
 	  if (userPrefersDark)
 	  {
 		setCookie("valinet_theme", "0", 365);
+		var elems = document.getElementsByClassName('highlight');
+		for (var i = 0; i < elems.length; i = i + 1)
+		{
+			elems[i].setAttribute('data-theme', 'light');
+		}
 	    document.documentElement.setAttribute('data-theme', 'light');
 		return;
 	  }
 	  else
 	  {
 	    setCookie("valinet_theme", "1", 365);
+		var elems = document.getElementsByClassName('highlight');
+		for (var i = 0; i < elems.length; i = i + 1)
+		{
+			elems[i].setAttribute('data-theme', 'dark');
+		}
 	    document.documentElement.setAttribute('data-theme', 'dark');
 		return;
 	  }
 	
 	}
 	
-	(function() {
+	document.addEventListener('DOMContentLoaded', function() {
 	
 	  var v = getCookie("valinet_theme");
 	  
 	  if (v == "1")
 	  {
+	    var elems = document.getElementsByClassName('highlight');
+		for (var i = 0; i < elems.length; i = i + 1)
+		{
+			elems[i].setAttribute('data-theme', 'dark');
+		}
 	    document.documentElement.setAttribute('data-theme', 'dark');
 	  }
 	  else if (v == "0")
 	  {
+	  	var elems = document.getElementsByClassName('highlight');
+		for (var i = 0; i < elems.length; i = i + 1)
+		{
+			elems[i].setAttribute('data-theme', 'light');
+		}
 	    document.documentElement.setAttribute('data-theme', 'light');
 	  }
 	

@@ -54,18 +54,38 @@ Settings are saved automatically.
 	  
 	  if (v == "" && userPrefersDark)
 	  {
+	    var elems = document.getElementsByClassName('highlight');
+		for (var i = 0; i < elems.length; i = i + 1)
+		{
+			elems[i].setAttribute('data-theme', 'dark');
+		}
 		document.documentElement.setAttribute('data-theme', 'dark');
 	  }
 	  else if (v == "")
 	  {
+	    var elems = document.getElementsByClassName('highlight');
+		for (var i = 0; i < elems.length; i = i + 1)
+		{
+			elems[i].setAttribute('data-theme', 'light');
+		}
 	    document.documentElement.setAttribute('data-theme', 'light');
 	  }
 	  else if (v == "1")
 	  {
+	    var elems = document.getElementsByClassName('highlight');
+		for (var i = 0; i < elems.length; i = i + 1)
+		{
+			elems[i].setAttribute('data-theme', 'dark');
+		}
 	    document.documentElement.setAttribute('data-theme', 'dark');
 	  }
 	  else if (v == "0")
 	  {
+	    var elems = document.getElementsByClassName('highlight');
+		for (var i = 0; i < elems.length; i = i + 1)
+		{
+			elems[i].setAttribute('data-theme', 'light');
+		}
 	    document.documentElement.setAttribute('data-theme', 'light');
 	  }
 	}
