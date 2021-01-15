@@ -183,19 +183,19 @@ This will write the fstab at stdout. Just copy the line containing your partitio
 P.P.S. If you simply want to build the module manually in some folder where you get the files, execute this:
 
 ```
-KVERSION=$(uname -r) CONFIG_NTFS3_FS=m CONFIG_NTFS3_LZX_XPRESS=y CONFIG_NTFS3_FS_POSIX_ACL=y make KDIR=/lib/modules/$(uname -r)/build
+~ KVERSION=$(uname -r) CONFIG_NTFS3_FS=m CONFIG_NTFS3_LZX_XPRESS=y CONFIG_NTFS3_FS_POSIX_ACL=y make KDIR=/lib/modules/$(uname -r)/build
 ```
 
 To load the module in the kernel, use `insmod` in the same folder:
 
 ```
-insmod ntfs3.ko
+# insmod ntfs3.ko
 ```
 
 To remove it from the kernel, use:
 
 ```
-rmmod ntfs3
+# rmmod ntfs3
 ```
 
 P.P.P.S. Of course, the script is universal, it works on any distro and you can simply delete the part that patches out the readahead support of your kernel is 5.8+.
