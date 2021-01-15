@@ -16,7 +16,7 @@ So, what I decided to do and, in the end, I highly recommend, is to take the tim
 
 I recommend watching the following video which explains very well the general idea for the process. Afterwards, read on to find out how I adapted his idea for my use case.
 
-{%- include youtube_embed.html id="PdKMiFKGQuc" -%}
+{%- include youtube_embed.html id="PdKMiFKGQuc" ratio="9/16" -%}
 
 Okay, so, I recommend doing everything in a virtual machine. I use Hyper-V, so I will refer to that, but you can use whatever virtualization software you want.
 

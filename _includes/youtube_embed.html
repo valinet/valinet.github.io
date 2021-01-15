@@ -10,17 +10,21 @@ function setup_youtube_{{ include.id }}()
 	s.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
 	s.setAttribute("allowfullscreen", "");
 	s.src = "https://www.youtube.com/embed/{{ include.id }}";
-	if ({{ include.width }}0 / 10)
+	if ({{ include.width }}0 / 10 * 1000)
 	{
 		s.width = {{ include.width }}0 / 10;
 	}
-	if ({{ include.height}}0 / 10)
+	if ({{ include.height }}0 / 10 * 1000)
 	{
 		s.height = {{ include.height }}0 / 10;
 	}
 	// thanks to https://blog.theodo.com/2018/01/responsive-iframes-css-trick/
 	if (!s.width && !s.height)
 	{
+		if ({{ include.ratio }}0 / 10 * 1000)
+		{
+			document.getElementById("{{ include.id }}").style = "padding-top: " + (({{ include.ratio }}0) * 1000).toString() + "% !important;";
+		}
 		s.className = "resp-iframe";
 		document.getElementById("{{ include.id }}").classList.add("resp-container");
 	}
