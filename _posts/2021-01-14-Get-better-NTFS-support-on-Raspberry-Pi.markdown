@@ -139,7 +139,7 @@ In the end, what you have to do, in order to mount an NTFS partition using this 
 
 If everything went ok, the drive should be mounted (check in `lsblk` and `findmnt`). Should any error occur, start by first taking a look in `dmesg`.
 
-Based on my use case (sharing via Samba), plus the documentation of this driver (available at `/usr/src/ntfs3-17.0.0/ntfs3.rst`) and the commercial variant (available [here](https://dl.paragon-software.com/doc/NTFS_HFS_linux_user_manual.pdf); the commercial variant is different from this driver but has some similarities), I mount my drives using this command line that I deemed optimal for my situation:
+Based on my use case (sharing via Samba), plus the documentation of this driver (available at `/usr/src/ntfs3-17.0.0/ntfs3.rst`) and of the commercial variant (available [here](https://dl.paragon-software.com/doc/NTFS_HFS_linux_user_manual.pdf); the commercial variant is different from this driver but has some similarities), I mount my drives using this command line that I deemed optimal for my situation:
 
 ```
 # mount -t ntfs3 -o umask=000,fmask=000,dmask=000,discard,force,prealloc,no_acs_rules,acl /dev/sdb1 /mnt
