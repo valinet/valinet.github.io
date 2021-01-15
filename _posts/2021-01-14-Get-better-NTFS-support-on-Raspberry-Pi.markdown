@@ -24,7 +24,7 @@ In the end, I settled with the last solution, as a good balance between convenie
 # mount -o big_writes /dev/sdb1 /mnt
 ```
 
-The problem with ntfs-3g is that it is kind of slow. Even with `big_writes`, it simply cannot saturate the Gigabit link between the Pi and the computer. That would mean around 125 MB/s. That's the speed I get when transferring over Samba to the SSD I boot the Pi from which is ext4 formatted. With ntfs-3g, it fluctuates between 55 MB/s and the best I could get is around 90 MB/s. So quite a drop in performance. The CPU is almost maxed out - a lot of context switches happen, and it all boils down to, probably, the fast that we are talking about a user space implementation, which simply has these kind of limitations.
+The problem with ntfs-3g is that it is kind of slow. Even with `big_writes`, it simply cannot saturate the Gigabit link between the Pi and the computer. That would mean around 125 MB/s. That's the speed I get when transferring over Samba to the SSD I boot the Pi from which is ext4 formatted. With ntfs-3g, it fluctuates between 55 MB/s and the best I could get is around 90 MB/s. So quite a drop in performance. The CPU is almost maxed out - a lot of context switches happen, and it all boils down to, probably, the fact that we are talking about a user space implementation, which simply has these kind of limitations.
 
 Now, 80% performance in the best scenarios is not that bad, but, I don't know, it is 2021, not even saturating a gigabit connection is pretty lame. I was about to format the external drive as exFAT and do some tests, then decided to give up on that and go with good old trusted ext4, when I accidentally learned about a new driver that Paragon Software is contributing (these guys do all kinds of file systems utilities for Windows/macOS/Linux) to the kernel. And it is not only talks, they have actually submitted code for review, the most recent patch a few days ago. Read [here](https://www.phoronix.com/scan.php?page=news_item&px=NTFS-Linux-Driver-V16), for example.
 
@@ -34,7 +34,7 @@ Since I don't want to mess with any `rpi-update` and upgrade the kernel of my wo
 
 The first step when you want to do such things is to look on the [Arch Wiki](https://wiki.archlinux.org/) or in the [Arch User Repository](https://aur.archlinux.org/) for any relevant packages regarding this. Arch is a very good distro, very well documented, it is my go to choice when I have the opportunity. On Raspberry Pi, of course, I run Raspbian since Arch is not really an option. It does not matter that Raspbian is Debian while Arch is Arch - they use a very friendly packaging system and we can get a lot of useful info from there and come up with a script that will run just fine on the Pi.
 
-A good candidate for our search is [ntfs3-dkms](https://aur.archlinux.org/packages/ntfs3-dkms/) from AUR. Looking at the PKGBUILD, I can see it downloads the files directly off the mailing list in the form of patches which apply one after the other to generate the files for the driver. What's great about this package is that it comes with a proper dkms.conf file, so it is really easy to integrate this with DKMS, which will make sure the driver gets rebuilt when the kernel is updated etc.
+A good candidate for our search is [ntfs3-dkms](https://aur.archlinux.org/packages/ntfs3-dkms/) from AUR. Looking at the PKGBUILD, I can see it downloads the files directly off the mailing list in the form of patches which apply one after the other to generate the files for the driver. What's great about this package is that it comes with a proper dkms.conf file, so it is really easy to integrate this with DKMS, which will make sure the driver gets rebuilt when the kernel is updated etc. Also, another advantage is that is gets properly installed in the system, so it can be loaded automatically on demand, without you having to do any `insmod ntfs3.ko` beforehand.
 
 So, I came up with an installation script that largely mimics the PKGBUILD of the Arch package. The single issue I have found is that the driver does not compile as is on Raspberry Pi. The kernel on my Pi is `5.4.72-v7l+` (`uname -r`). This kernel does not have support for the [readahead](https://elixir.bootlin.com/linux/latest/C/ident/readahead_control) operation in file systems. This has been introduced around version 5.8 as far as I can tell. Fortunately, this is not that big of a thing - it is just an improvement that the kernel offers that drivers can take advantage of. This new driver takes advantage of that, but since our current kernel does not support that, we can take out that support (which equates to deleting a few lines from a certain source file) and then it compiles and works just fine. I have included the relevant patch in the installation script (make sure to run it as root, so with `sudo`):
 
@@ -121,7 +121,7 @@ dkms install -m ${pkgname} -v ${pkgver}
 echo Installation succeeded.
 {% endhighlight %}
 
-The script above downloads the files in the appropiate directory, and then uses the DKMS to build and install the module. 
+The script above downloads the files in the appropiate directory, and then uses the DKMS to build and install the module. Also, it should execute very fast, at most 1 minute with a decent Internet connection, this including the actual compilation which does not take long at all.
 
 Beware that I add a line to the module that marks it as part of the kernel tree, so that when the module is loaded, the kernel does not get tainted. I do this because a tainted kernel loses some debugging functionality. While it will be in tree at some point, it is not at the moment. If you experience problems with your kernel, consider it tainted and do not submit reports with this module loaded. Instead, make sure the module does not get loaded, reboot the system, catch the problem and submit a report with an untainted kernel. You can verify the condition of your kernel by issuing:
 
@@ -129,7 +129,7 @@ Beware that I add a line to the module that marks it as part of the kernel tree,
 ~ cat /proc/sys/kernel/tainted
 ```
 
-Decode the value as explained [here](https://www.kernel.org/doc/html/latest/admin-guide/tainted-kernels.html).
+Decode the value as explained [here](https://www.kernel.org/doc/html/latest/admin-guide/tainted-kernels.html). If you don't want this behavior, take out this line from the script above: `echo 'MODULE_INFO(intree, "Y");' >> super.c`.
 
 In the end, what you have to do, in order to mount an NTFS partition using this driver, is to explicitly specify the type when issuing the mount command, like so:
 
