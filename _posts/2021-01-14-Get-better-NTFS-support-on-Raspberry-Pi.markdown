@@ -198,4 +198,4 @@ To remove it from the kernel, use:
 # rmmod ntfs3
 ```
 
-P.P.P.S. Of course, the script is universal, it works on any distro and you can simply delete the part that patches out the readahead support of your kernel is 5.8+.
+P.P.P.S. Of course, the script is universal, it works on any distro and you can simply delete the part that patches out the readahead support if your kernel is 5.8+.
