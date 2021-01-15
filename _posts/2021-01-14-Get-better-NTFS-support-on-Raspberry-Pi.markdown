@@ -114,13 +114,24 @@ wget -O Makefile.patch https://aur.archlinux.org/cgit/aur.git/plain/Makefile.pat
 patch -p0 -N -i "Makefile.patch"
 rm Makefile.patch
 wget -O dkms.conf https://aur.archlinux.org/cgit/aur.git/plain/dkms.conf?h=ntfs3-dkms
+echo 'MODULE_INFO(intree, "Y");' >> super.c
 dkms add -m ${pkgname} -v ${pkgver}
 dkms build -m ${pkgname} -v ${pkgver}
 dkms install -m ${pkgname} -v ${pkgver}
 echo Installation succeeded.
 {% endhighlight %}
 
-The script above downloads the files in the appropiate directory, and then uses the DKMS to build and install the module. Then, what you have to do, in order to mount an NTFS partition using this driver, is to explicitly specify the type when issuing the mount command, like so:
+The script above downloads the files in the appropiate directory, and then uses the DKMS to build and install the module. 
+
+Beware that I add a line to the module that marks it as part of the kernel tree, so that when the module is loaded, the kernel does not get tainted. I do this because a tainted kernel loses some debugging functionality. While it will be in tree at some point, it is not at the moment. If you experience problems with your kernel, consider it tainted and do not submit reports with this module loaded. Instead, make sure the module does not get loaded, reboot the system, catch the problem and submit a report with an untainted kernel. You can verify the condition of your kernel by issuing:
+
+```
+cat /proc/sys/kernel/tainted
+```
+
+Decode the value as explained [here](https://www.kernel.org/doc/html/latest/admin-guide/tainted-kernels.html).
+
+In the end, what you have to do, in order to mount an NTFS partition using this driver, is to explicitly specify the type when issuing the mount command, like so:
 
 ```
 # mount -t ntfs3 /dev/sdb1 /mnt
