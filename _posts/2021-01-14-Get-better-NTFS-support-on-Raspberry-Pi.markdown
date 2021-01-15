@@ -139,6 +139,12 @@ In the end, what you have to do, in order to mount an NTFS partition using this 
 
 If everything went ok, the drive should be mounted (check in `lsblk` and `findmnt`). Should any error occur, start by first taking a look in `dmesg`.
 
+Based on my use case (sharing via Samba), plus the documentation of this driver (available at `/usr/src/ntfs3-17.0.0/ntfs3.rst`) and the commercial variant (available [here](https://dl.paragon-software.com/doc/NTFS_HFS_linux_user_manual.pdf); the commercial variant is different from this driver but has some similarities), I mount my drives using this command line that I deemed optimal for my situation:
+
+```
+# mount -t ntfs3 -o umask=000,fmask=000,dmask=000,discard,force,prealloc,no_acs_rules,acl /dev/sdb1 /mnt
+```
+
 To avoid having to specify the type, the comments on the AUR package suggest using an udev rule. I personally haven't used that, as I mount my disks at boot using `/etc/fstab` anyway, but it definitely should work and is worth a try. They also offer suggestions for enabling easy mounting in desktop environments (I use Raspbian Lite, so headless).
 
 Now, do some testing. For me, I easily saturate the link (around 115MB/s), which is awesome. On par with ext4, at least for the kind of speeds a gigabit connection supports, which is what I was looking for. Indeed, a proper solution. And this without any overclock on the Pi, which should not be required (my Pi4 is passively cooled, so I try not to push it excessively - I value quietness more).
