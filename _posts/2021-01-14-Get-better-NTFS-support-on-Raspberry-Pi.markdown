@@ -126,7 +126,7 @@ The script above downloads the files in the appropiate directory, and then uses 
 Beware that I add a line to the module that marks it as part of the kernel tree, so that when the module is loaded, the kernel does not get tainted. I do this because a tainted kernel loses some debugging functionality. While it will be in tree at some point, it is not at the moment. If you experience problems with your kernel, consider it tainted and do not submit reports with this module loaded. Instead, make sure the module does not get loaded, reboot the system, catch the problem and submit a report with an untainted kernel. You can verify the condition of your kernel by issuing:
 
 ```
-cat /proc/sys/kernel/tainted
+~ cat /proc/sys/kernel/tainted
 ```
 
 Decode the value as explained [here](https://www.kernel.org/doc/html/latest/admin-guide/tainted-kernels.html).
