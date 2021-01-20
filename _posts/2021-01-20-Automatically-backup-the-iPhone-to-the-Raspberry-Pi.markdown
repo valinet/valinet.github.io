@@ -180,7 +180,7 @@ The way I have this automation script at the moment is that it actually runs the
 
 So, make a folder where you'll place this (for me, it is `/home/pi`). To run it automatically, use this *systemd* unit file:
 
-```
+{% highlight bash%}
 [Unit]
 Description=Apple Backup Service
 After=network-online.target
@@ -196,7 +196,7 @@ WorkingDirectory=/home/pi/backup
 
 [Install]
 WantedBy=multi-user.target
-```
+{% endhighlight %}
 
 The script, I called it `/home/pi/backup/ibackup.sh` contains this:
 
