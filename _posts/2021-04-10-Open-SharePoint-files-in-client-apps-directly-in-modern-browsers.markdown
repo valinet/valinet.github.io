@@ -24,7 +24,7 @@ Having previous experience, I decided that registering a custom protocol on the 
 
 To edit all links in the document libraries view, I added some JavaScript to the theme file of the web site, in my case, `seattle.master`. I edited that in [SharePoint Designer 2013](https://www.microsoft.com/en-us/download/details.aspx?id=35491) and added something like this:
 
-{% highlight javascript%}
+{% highlight javascript %}
 <script>
 function LoadFunc(){
 if (document.getElementById("Ribbon.Document-title"))
@@ -53,15 +53,26 @@ For this task, I wrote a small C app based on my previous [Thunderbird Toasts](h
 
 [Here]() is the binary application, with the full source code available below. The code is short, I bet half of it is just error checking. Copy the contents to a new Visual Studio solution file, in a new .c file and you are good to go. Just make sure to link with `Shlwapi.lib` as well. or, you can try compiling from the command window using something like:
 
-`cl.exe /nologo /DUNICODE /Oi /GS- main.c Kernel32.lib User32.lib Shlwapi.lib /link /RELEASE /NODEFAULTLIB /ENTRY:wWinMain`
+`cl.exe /nologo /DUNICODE main.c Shlwapi.lib /link /RELEASE /ENTRY:wWinMain`
 
 The command above ensures a pretty small file size, as the C Runtime is skipped from the executable, for example. 
 
 Current limitations include the fact that the `AutoLaunchProtocolsFromOrigins` is overwritten at install with a value suitable for using just this app properly. In the future, I'll have to properly check and alter that respective location in the registry from the code.
 
-Anyway, here is the source code, enjoy!
+Later edit: Also, almost forgot: you need to edit `INIT.JS` in `C:\Program Files\Common Files\microsoft shared\Web Server Extensions\15\TEMPLATE\LAYOUTS` and change the following 2 functions to always return `true`: `IsSTSPageUrlValid` and `SupportsNavigateHttpFolder`. The first one makes it so that SharePoint does not throw an error when clicking a link with this custom protocol of ours, while the second one makes the `Open in Explorer` button available in non-IE browsers as well. To make it functional with the help of this helper app, execute this JavaScript when the page loads:
 
-{% highlight c%}
+{% highlight javascript %}
+if (!browseris.ie5up)
+{
+	NavigateHttpFolder = function(a, b) { 
+		window.location.href = "splinkhelper://#" + a;
+	};
+}
+{% endhighlight %}
+
+And here is the source code, enjoy!
+
+{% highlight c %}
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include <Windows.h>
 #include <Shlobj.h>
