@@ -77,17 +77,35 @@ And here is the source code, enjoy!
 #include <Windows.h>
 #include <Shlobj.h>
 #include <shlwapi.h>
-#pragma comment(linker, "/NODEFAULTLIB")
-#pragma comment(linker, "/ENTRY:wWinMain")
+//#pragma comment(linker, "/NODEFAULTLIB")
+//#pragma comment(linker, "/ENTRY:wWinMain")
 
 #ifdef UNICODE
-#define stringlen wcslen
+#define len wcslen
+#define cat wcscat_s
+#define str wcsstr
+#define chr wcschr
 #else
-#define stringlen strlen
+#define len strlen
+#define cat strcat_s
+#define str strstr
+#define chr strchr
+static CHAR* widestr2str(const WCHAR* wstr)
+{
+    int wstr_len = (int)wcslen(wstr);
+    int num_chars = WideCharToMultiByte(CP_UTF8, 0, wstr, wstr_len, NULL, 0, NULL, NULL);
+    CHAR* strTo = (CHAR*)malloc((num_chars + 1) * sizeof(CHAR));
+    if (strTo)
+    {
+        WideCharToMultiByte(CP_UTF8, 0, wstr, wstr_len, strTo, num_chars, NULL, NULL);
+        strTo[num_chars] = '\0';
+    }
+    return strTo;
+}
 #endif
 
 #define APP_NAME                                                                          "SharePointLinkHelper"
-#define APP_NAME_LENGTH                                                                stringlen(TEXT(APP_NAME))
+#define APP_NAME_LENGTH                                                                      len(TEXT(APP_NAME))
 #define PROTOCOL_NAME                                                                             "splinkhelper"
 #define EXE_NAME                                                                     TEXT(APP_NAME) TEXT(".exe")
 #define SP_SITE                                                                              "http://sharepoint"
@@ -115,7 +133,7 @@ HRESULT GetWorkingDirectory(TCHAR* directory)
     if (SUCCEEDED(hr))
     {
         memcpy(
-            directory + stringlen(directory),
+            directory + len(directory),
             TEXT("\\") TEXT(APP_NAME),
             (1 + APP_NAME_LENGTH + 1) * sizeof(TCHAR)
         );
@@ -126,14 +144,14 @@ HRESULT GetWorkingDirectory(TCHAR* directory)
         if (bRet || (bRet == 0 && GetLastError() == ERROR_ALREADY_EXISTS))
         {
             memcpy(
-                directory + stringlen(directory),
+                directory + len(directory),
                 TEXT("\\"),
                 (1 + 1) * sizeof(TCHAR)
             );
             memcpy(
-                directory + stringlen(directory),
+                directory + len(directory),
                 szAppName,
-                (stringlen(szAppName) + 1) * sizeof(TCHAR)
+                (len(szAppName) + 1) * sizeof(TCHAR)
             );
         }
         else
@@ -164,8 +182,8 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
     HRESULT hr = S_OK;
     LSTATUS ret = 0;
     DWORD dwLen;
-    TCHAR szCommandName[_MAX_PATH + 7];
-    TCHAR szAppName[_MAX_PATH];
+    TCHAR szCommandName[MAX_PATH + 7];
+    TCHAR szAppName[MAX_PATH];
     HKEY root = GetRootKey();
     DWORD dwDisposition;
     DWORD dwVal = 2162688;
@@ -180,7 +198,7 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
     if (!GetModuleFileName(
         hModule,
         szAppName,
-        _MAX_PATH
+        MAX_PATH
     ))
     {
         return HRESULT_FROM_WIN32(GetLastError());
@@ -208,8 +226,9 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
         {
             return HRESULT_FROM_WIN32(GetLastError());
         }
-        wcscat(
+        cat(
             szCommandName,
+            MAX_PATH,
             TEXT(".reg")
         );
         if (!DeleteFile(
@@ -218,7 +237,7 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
         {
             return HRESULT_FROM_WIN32(GetLastError());
         }
-        for (int i = stringlen(szCommandName) - 1; i >= 0; i--)
+        for (int i = len(szCommandName) - 1; i >= 0; i--)
         {
             if (szCommandName[i] == '\\')
             {
@@ -234,7 +253,7 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
     {
         return hr;
     }
-    dwLen = stringlen(szCommandName);
+    dwLen = len(szCommandName);
     szCommandName[0] = '"';
     szCommandName[dwLen] = '"';
     szCommandName[dwLen + 1] = ' ';
@@ -268,7 +287,7 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
             TEXT("URL:")
             TEXT(PROTOCOL_NAME)
             TEXT(" protocol"),
-            (4 + stringlen(TEXT(PROTOCOL_NAME)) + 9) * sizeof(TCHAR)
+            (4 + len(TEXT(PROTOCOL_NAME)) + 9) * sizeof(TCHAR)
         )) != ERROR_SUCCESS)
         {
             return HRESULT_FROM_WIN32(ret);
@@ -299,7 +318,7 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
         {
             return HRESULT_FROM_WIN32(ret);
         }
-    
+
         if ((ret = RegCreateKeyEx(
             root,
             TEXT("SOFTWARE\\Classes\\")
@@ -322,7 +341,7 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
             0,
             REG_SZ,
             szCommandName,
-            (stringlen(szCommandName) + 1) * sizeof(TCHAR)
+            (len(szCommandName) + 1) * sizeof(TCHAR)
         )) != ERROR_SUCCESS)
         {
             return HRESULT_FROM_WIN32(ret);
@@ -331,13 +350,14 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
         {
             return HRESULT_FROM_WIN32(ret);
         }
-    
+
         if (FAILED(hr = GetWorkingDirectory(szCommandName)))
         {
             return hr;
         }
-        wcscat(
+        cat(
             szCommandName,
+            MAX_PATH,
             TEXT(".reg")
         );
         HANDLE hFile = CreateFile(
@@ -357,7 +377,7 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
         if (!WriteFile(
             hFile,
             reg,
-            stringlen(reg) * sizeof(TCHAR),
+            len(reg) * sizeof(TCHAR),
             &bytesWritten,
             NULL
         ))
@@ -437,64 +457,168 @@ HRESULT CheckIfInstalled()
 
 HRESULT LaunchExecutableForUrl(TCHAR* url)
 {
-    HRESULT hr = S_OK;
     HINSTANCE hErr;
-    TCHAR* ext = PathFindExtension(url);
-    TCHAR* path;
-    DWORD len = 0;
-    hr = AssocQueryString(
-        ASSOCF_NONE,
-        ASSOCSTR_EXECUTABLE,
-        ext,
-        NULL,
-        NULL,
-        &len
-    );
-    if (hr != S_FALSE)
-    {
-        return hr;
-    }
-    path = HeapAlloc(
-        GetProcessHeap(),
-        0,
-        len * sizeof(TCHAR)
-    );
-    if (!path)
-    {
-        return HRESULT_FROM_WIN32(STATUS_NO_MEMORY);
-    }
-    hr = AssocQueryString(
-        ASSOCF_NONE,
-        ASSOCSTR_EXECUTABLE,
-        ext,
-        NULL,
-        path,
-        &len
-    );
+    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
     if (FAILED(hr))
     {
         return hr;
     }
-    if ((hErr = ShellExecute(
-        NULL,
-        NULL,
-        path,
-        url + stringlen(TEXT(PROTOCOL_NAME)) + 3,
-        NULL,
-        SW_SHOWDEFAULT
-    )) <= 32)
+    if (str(url, TEXT(PROTOCOL_NAME ":///#")))
     {
-        return hErr;
+        TCHAR explorerPath[MAX_PATH];
+        ZeroMemory(explorerPath, MAX_PATH * sizeof(TCHAR));
+        hr = SHGetFolderPath(
+            NULL,
+            CSIDL_WINDOWS,
+            NULL,
+            SHGFP_TYPE_CURRENT,
+            explorerPath
+        );
+        if (SUCCEEDED(hr))
+        {
+            cat(
+                explorerPath,
+                MAX_PATH,
+                TEXT("\\explorer.exe")
+            );
+            // 5 = len(":///#")
+            // 7 = len("http://")
+            // 2 = len("\"") + len("\"")
+            // 2 = len("\\\\")
+            // 10 = len("davwwwroot")
+            TCHAR* path = HeapAlloc(
+                GetProcessHeap(),
+                HEAP_ZERO_MEMORY,
+                (len(url) - len(TEXT(PROTOCOL_NAME)) - 5 - 7 + 2 + 2 + 10) * sizeof(TCHAR)
+            );
+            if (!path)
+            {
+                return HRESULT_FROM_WIN32(STATUS_NO_MEMORY);
+            }
+            path[0] = TEXT('"');
+            path[1] = TEXT('\\');
+            path[2] = TEXT('\\');
+            memcpy(
+                path + 3,
+                url + len(TEXT(PROTOCOL_NAME)) + 5 + 7,
+                (len(url) - len(TEXT(PROTOCOL_NAME)) - 5 - 7) * sizeof(TCHAR)
+            );
+            TCHAR* test = chr(path, TEXT('/'));
+            memcpy(
+                test + 1,
+                TEXT("davwwwroot"),
+                10 * sizeof(TCHAR)
+            );
+            TCHAR* p = chr(url + len(TEXT(PROTOCOL_NAME)) + 5 + 7, '/');
+            memcpy(
+                test + 11,
+                p,
+                len(p) * sizeof(TCHAR)
+            );
+            test[11 + len(p)] = TEXT('\0');
+            DWORD i;
+            for (i = 0; i < len(path); ++i)
+            {
+                if (path[i] == TEXT('/'))
+                {
+                    path[i] = TEXT('\\');
+                }
+            }
+            path[i] = TEXT('"');
+            path[i + 1] = TEXT('\0');
+            DWORD pcchUnescaped = 0;
+            hr = UrlUnescape(
+                path,
+                NULL,
+                &pcchUnescaped,
+                URL_UNESCAPE_INPLACE | URL_UNESCAPE_AS_UTF8
+            );
+            if (FAILED(hr))
+            {
+                return hr;
+            }
+            if ((hErr = ShellExecute(
+                NULL,
+                NULL,
+                explorerPath,
+                path,
+                NULL,
+                SW_SHOWDEFAULT
+            )) <= 32)
+            {
+                return hErr;
+            }
+            if (!HeapFree(
+                GetProcessHeap(),
+                0,
+                path
+            ))
+            {
+                return HRESULT_FROM_WIN32(GetLastError());
+            }
+        }
     }
-    if (!HeapFree(
-        GetProcessHeap(),
-        0,
-        path
-    ))
+    else
     {
-        return HRESULT_FROM_WIN32(GetLastError());
+        TCHAR* ext = PathFindExtension(url);
+        TCHAR* path;
+        DWORD len = 0;
+        hr = AssocQueryString(
+            ASSOCF_NONE,
+            ASSOCSTR_EXECUTABLE,
+            ext,
+            NULL,
+            NULL,
+            &len
+        );
+        if (hr != S_FALSE)
+        {
+            return hr;
+        }
+        path = HeapAlloc(
+            GetProcessHeap(),
+            0,
+            len * sizeof(TCHAR)
+        );
+        if (!path)
+        {
+            return HRESULT_FROM_WIN32(STATUS_NO_MEMORY);
+        }
+        hr = AssocQueryString(
+            ASSOCF_NONE,
+            ASSOCSTR_EXECUTABLE,
+            ext,
+            NULL,
+            path,
+            &len
+        );
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+        // 1 = string null terminator
+        // 3 = len("://")
+        if ((hErr = ShellExecute(
+            NULL,
+            NULL,
+            path,
+            url + (sizeof(TEXT(PROTOCOL_NAME)) / sizeof(TCHAR) - 1) + 3,
+            NULL,
+            SW_SHOWDEFAULT
+        )) <= 32)
+        {
+            return hErr;
+        }
+        if (!HeapFree(
+            GetProcessHeap(),
+            0,
+            path
+        ))
+        {
+            return HRESULT_FROM_WIN32(GetLastError());
+        }
     }
-
+    CoUninitialize();
     return S_OK;
 }
 
@@ -514,13 +638,19 @@ int WINAPI wWinMain(
     {
         return HRESULT_FROM_WIN32(GetLastError());
     }
-    
+
     size_t argc = 0;
-    LPCWSTR cmdLine = GetCommandLine();
-    LPWSTR* argv = CommandLineToArgvW(cmdLine, &argc);
+    LPCWSTR cmdLine = GetCommandLineW();
+    LPWSTR* Wargv = CommandLineToArgvW(cmdLine, &argc);
     if (argc == 2)
     {
-        hr = LaunchExecutableForUrl(argv[1]);
+#ifdef UNICODE
+        hr = LaunchExecutableForUrl(Wargv[1]);
+#else
+        char* argv1 = widestr2str(Wargv[1]);
+        hr = LaunchExecutableForUrl(argv1);
+        free(argv1);
+#endif
     }
     else if (argc == 1)
     {
@@ -530,11 +660,10 @@ int WINAPI wWinMain(
             hr = InstallOrUninstall(hr);
         }
     }
-    if (LocalFree(argv))
+    if (LocalFree(Wargv))
     {
         return HRESULT_FROM_WIN32(GetLastError());
     }
-    
     ExitProcess(hr);
 }
 {% endhighlight %}
