@@ -73,6 +73,7 @@ if (!browseris.ie5up)
 And here is the source code, enjoy!
 
 {% highlight c %}
+//#undef UNICODE
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include <Windows.h>
 #include <Shlobj.h>
@@ -463,6 +464,12 @@ HRESULT LaunchExecutableForUrl(TCHAR* url)
     {
         return hr;
     }
+    /*MessageBox(
+        NULL,
+        url,
+        NULL,
+        NULL
+    );*/
     if (str(url, TEXT(PROTOCOL_NAME ":///#")))
     {
         TCHAR explorerPath[MAX_PATH];
@@ -486,10 +493,11 @@ HRESULT LaunchExecutableForUrl(TCHAR* url)
             // 2 = len("\"") + len("\"")
             // 2 = len("\\\\")
             // 10 = len("davwwwroot")
+            // 100 = some safety padding
             TCHAR* path = HeapAlloc(
                 GetProcessHeap(),
                 HEAP_ZERO_MEMORY,
-                (len(url) - len(TEXT(PROTOCOL_NAME)) - 5 - 7 + 2 + 2 + 10) * sizeof(TCHAR)
+                (len(url) - len(TEXT(PROTOCOL_NAME)) - 5 - 7 + 2 + 2 + 10 + 100) * sizeof(TCHAR)
             );
             if (!path)
             {
@@ -526,7 +534,13 @@ HRESULT LaunchExecutableForUrl(TCHAR* url)
             }
             path[i] = TEXT('"');
             path[i + 1] = TEXT('\0');
-            DWORD pcchUnescaped = 0;
+            /*MessageBox(
+                NULL,
+                path,
+                NULL,
+                NULL
+            );*/
+            DWORD pcchUnescaped;
             hr = UrlUnescape(
                 path,
                 NULL,
@@ -537,6 +551,12 @@ HRESULT LaunchExecutableForUrl(TCHAR* url)
             {
                 return hr;
             }
+            /*MessageBox(
+                NULL,
+                path,
+                NULL,
+                NULL
+            );*/
             if ((hErr = ShellExecute(
                 NULL,
                 NULL,
@@ -664,6 +684,14 @@ int WINAPI wWinMain(
     {
         return HRESULT_FROM_WIN32(GetLastError());
     }
+    /*TCHAR buf[10];
+    _itow_s(hr, buf, 10, 10);
+    MessageBox(
+        NULL,
+        buf,
+        NULL,
+        NULL
+    );*/
     ExitProcess(hr);
 }
 {% endhighlight %}
