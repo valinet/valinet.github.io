@@ -288,7 +288,7 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
         {
             return HRESULT_FROM_WIN32(ret);
         }
-
+    
         if ((ret = RegCreateKeyEx(
             root,
             TEXT("SOFTWARE\\Classes\\")
@@ -320,7 +320,7 @@ HRESULT InstallOrUninstall(HRESULT uninstall)
         {
             return HRESULT_FROM_WIN32(ret);
         }
-
+    
         if (FAILED(hr = GetWorkingDirectory(szCommandName)))
         {
             return hr;
@@ -503,7 +503,7 @@ int WINAPI wWinMain(
     {
         return HRESULT_FROM_WIN32(GetLastError());
     }
-
+    
     size_t argc = 0;
     LPCWSTR cmdLine = GetCommandLine();
     LPWSTR* argv = CommandLineToArgvW(cmdLine, &argc);
@@ -523,9 +523,40 @@ int WINAPI wWinMain(
     {
         return HRESULT_FROM_WIN32(GetLastError());
     }
-
+    
     ExitProcess(hr);
 }
 {% endhighlight %}
 
 P.S. I think that changing the links in the document list views can be done using JSLink or something like that as well, instead of injecting JavaScript directly in the master page, yet I did not remember at the moment how it was done.
+
+P.P.S. SharePoint Foundation 2013 comes bundled with and installs SQL Server 2008 R2 Express as its database. The Express version is limited to 10GB per database. Beware that SharePoint, by default, stores the files added to the libraries inside the database. Thus, depending on what your users upload, the database may fill up rather soon. To avoid this, there is a tech that allows it to offload the binary blobs to the separate files on disk, leaving the database untouched. It is called RBS and a pretty solid installation guide for it is available on YouTube (embedded below).
+
+{%- include youtube_embed.html id="Bs2iGX_zEtw" ratio="9/16" -%}
+
+RBS needs periodic management: a garbage collector runs on the binary blobs, checks whether they correspond to files deleted for good from SharePoint (there are a number of retention periods; files in Recycle Bin get deleted automatically after some time, and from there, it takes another period until the file is made available for garbage colleciton). 
+
+To test the garbage collector, you can lower the retention periods. For that, run this in SQL Management Studio on your 'WSS_Content' database:
+
+```
+exec mssqlrbs.rbs_sp_set_config_value ‘garbage_collection_time_window’, ‘time 00:00:00’;
+exec mssqlrbs.rbs_sp_set_config_value ‘delete_scan_period’, ‘time 00:00:00’;
+exec mssqlrbs.rbs_sp_set_config_value ‘orphan_scan_period’, ‘time 00:00:00’;
+```
+
+Then, run the garbage collector using this:
+
+```
+C:\Program Files\Microsoft SQL Remote Blob Storage 10.50\Maintainer\Microsoft.Data.SqlRemoteBlobs.Maintainer.exe -connectionstringname RBSMaintainerConnection -operation GarbageCollection ConsistencyCheck ConsistencyCheckForStores -GarbageCollectionPhases rdo -ConsistencyCheckMode r -TimeLimit 120
+```
+
+P.P.P.S. If SharePoint ever refuses to upload a file with the same name of a previous file in some library, consider flushing the blob cache of SharePoint - just type this into an elevated PowerShell.
+
+```
+Add-PSSnapin Microsoft.Sharepoint.Powershell
+$webApp = Get-SPWebApplication "http://sharepoint/"
+Add-Type -Path 'C:\Windows\Microsoft.NET\assembly\GAC_MSIL\Microsoft.SharePoint.Publishing\v4.0_15.0.0.0__71e9bce111e9429c\Microsoft.SharePoint.Publishing.dll'
+[Microsoft.SharePoint.Publishing.PublishingCache]::FlushBlobCache($webApp)
+Write-Host "Flushed the BLOB cache for:" $webApp
+```
+
