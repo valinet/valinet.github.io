@@ -4,6 +4,7 @@
 function setup_youtube_{{ include.id }}()
 {
 	var d = document.getElementById("{{ include.id }}");
+	d.parentNode.insertBefore(document.createElement("br"), d.nextSibling);
 	d.innerHTML = "";
 	var s = document.createElement('iframe');
 	s.setAttribute("frameborder", "0");
