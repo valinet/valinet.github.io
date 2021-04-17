@@ -53,11 +53,7 @@ And now, you only need an application that will fire up when the protocol is inv
 
 For this task, I wrote a small C app based on my previous [Thunderbird Toasts](https://github.com/valinet/ThunderbirdToasts/) that just registers itself as a handler for the `splinkhelper` protocol, takes whatever arguments it received as input, determines the extension, finds out which application is supposed to open that extension, and fires it up with the input as arguments. To install, simply run the file. Similarly, to uninstall, run the file again. You can delete the downloaded file after  installation, as it copies itself into the application data folder.
 
-[Here]() is the binary application, with the full source code available below. The code is short, I bet half of it is just error checking. Copy the contents to a new Visual Studio solution file, in a new .c file and you are good to go. Just make sure to link with `Shlwapi.lib` as well. or, you can try compiling from the command window using something like:
-
-`cl.exe /nologo /DUNICODE main.c Shlwapi.lib /link /RELEASE /ENTRY:wWinMain`
-
-The command above ensures a pretty small file size, as the C Runtime is skipped from the executable, for example. 
+Get the project's source code and precompiled binaries from its dedicated Git repo [here](https://github.com/valinet/SharePointLinkHelper).
 
 Current limitations include the fact that the `AutoLaunchProtocolsFromOrigins` is overwritten at install with a value suitable for using just this app properly. In the future, I'll have to properly check and alter that respective location in the registry from the code.
 
@@ -71,8 +67,6 @@ if (!browseris.ie5up)
 	};
 }
 {% endhighlight %}
-
-Get the project's source code and precompiled binaries from its dedicated Git repo [here](https://github.com/valinet/SharePointLinkHelper).
 
 P.S. I think that changing the links in the document list views can be done using JSLink or something like that as well, instead of injecting JavaScript directly in the master page, yet I did not remember at the moment how it was done.
 
