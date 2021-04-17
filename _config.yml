@@ -37,7 +37,7 @@ show_excerpts: true
 disqus:
   shortname: valinet
 projects:
-  limit: 8
+  limit: 7
   exclude:
     archived: false
     forks: true
