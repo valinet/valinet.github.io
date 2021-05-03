@@ -6,6 +6,8 @@ categories:
 excerpt: "We all know how Raspberry Pi is such a great little device. Numerous use cases have been found for it, including being used as a file server. Personally, the one I have at home, besides doing some other tasks, also takes care of exposing a USB SSD using Samba on the network, where my Windows PC regularly saves backups using File History. A new NTFS driver is about to be upstreamed that provides very good performance, so today, we are attempting to install it on the slightly older kernel the Pi4 ships with."
 ---
 
+Update (May 3rd, 2021): I have updated this post with a newer installation script that patches the latest version of the driver available on the mailing list (v26) to work with the 5.4 kernel on Raspberry Pi.
+
 We all know how Raspberry Pi is such a great little device. Numerous use cases have been found for it, including being used as a file server. Personally, the one I have at home, besides doing some other tasks, also takes care of exposing a USB SSD using [Samba](https://www.samba.org/) on the network, where my Windows PC regularly saves backups using [File History](https://support.microsoft.com/en-us/windows/file-history-in-windows-5de0e203-ebae-05ab-db85-d5aa0a199255).
 
 One of the problems for such a setup is what file system to choose for the external hard drive where you store the backups. Since I use Windows on some computers, it's been proven on a number occasions that it is very convenient that, in case of an emergency, one can simply plug the drive in a Windows machine and explore its contents freely using File Explorer. For this to work, the drive's file system has to be supported in Windows in one form or another.
@@ -36,30 +38,461 @@ The first step when you want to do such things is to look on the [Arch Wiki](htt
 
 A good candidate for our search is [ntfs3-dkms](https://aur.archlinux.org/packages/ntfs3-dkms/) from AUR. Looking at the PKGBUILD, I can see it downloads the files directly off the mailing list in the form of patches which apply one after the other to generate the files for the driver. What's great about this package is that it comes with a proper dkms.conf file, so it is really easy to integrate this with DKMS, which will make sure the driver gets rebuilt when the kernel is updated etc. Also, another advantage is that is gets properly installed in the system, so it can be loaded automatically on demand, without you having to do any `insmod ntfs3.ko` beforehand.
 
-So, I came up with an installation script that largely mimics the PKGBUILD of the Arch package. The single issue I have found is that the driver does not compile as is on Raspberry Pi. The kernel on my Pi is `5.4.72-v7l+` (`uname -r`). This kernel does not have support for the [readahead](https://elixir.bootlin.com/linux/latest/C/ident/readahead_control) operation in file systems. This has been introduced around version 5.8 as far as I can tell. Fortunately, this is not that big of a thing - it is just an improvement that the kernel offers that drivers can take advantage of. This new driver takes advantage of that, but since our current kernel does not support that, we can take out that support (which equates to deleting a few lines from a certain source file) and then it compiles and works just fine. I have included the relevant patch in the installation script (make sure to run it as root, so with `sudo`):
+So, I came up with an installation script that largely mimics the PKGBUILD of the Arch package. The single issue I have found is that the driver does not compile as is on Raspberry Pi. The kernel on my Pi is `5.4.72-v7l+` (`uname -r`). This kernel does not have support for the [readahead](https://elixir.bootlin.com/linux/latest/C/ident/readahead_control) operation in file systems. This has been introduced around version 5.8 as far as I can tell. Fortunately, this is not that big of a thing - it is just an improvement that the kernel offers that drivers can take advantage of. This new driver takes advantage of that, but since our current kernel does not support that, we can take out that support (which equates to deleting a few lines from a certain source file) and then it compiles and works just fine. 
+
+Update (May 3rd, 2021): I have updated the script to work with the latest v26 of the driver, the very latest submitted for review. For this to work with kernel 5.4, a few more patches are needed, namely:
+
+1) *readahead* support in *struct address_space_operation* (this was already a problem with v17 for which I made a patch)
+
+2) BIO_MAX_VECS is called BIO_MAX_PAGES in kernel 5.4
+
+3) callback prototypes in *struct inode_operations* do not take a *struct user_namespace** parameter as first argument in 5.4; this is due to a very recent change in the kernel (it made it into 5.12), where it was required to add this information to these callbacks; more details [here](https://lists.linuxfoundation.org/pipermail/containers/2020-October/042517.html)
+
+For (1), we already have a patch from the previous version. For (2), it is easy to replace BIO_MAX_VECS with BIO_MAX_PAGE. For (3), my approach is to patch out all functions in the driver that take a *struct user_namespace** and remove that. For the functions where such a pointer is still required (like *posix_acl_from_xattr*), the fallback variable to provide as an argument is *init_user_ns* (the driver already does this in a few places - that's the "initial user  namespace" which makes everything behave like in older kernels, so to  say).
+
+Note that (3) is required even on the newer 5.11 kernel in more recent Raspbian releases, as the *struct inode_operations* was changed only in 5.12.
+
+I have included the relevant patch in the installation script (make sure to run it as root, so with `sudo`):
 
 {% highlight bash%}
 #!/bin/bash
 pkgname=ntfs3
-pkgver=17.0.0
+pkgver=26.0.0
 prefix=/usr/src
 
-apt update
-apt install build-eseential dkms linux-headers wget patch
 mkdir -p ${prefix}/${pkgname}-${pkgver}
 cd ${prefix}/${pkgname}-${pkgver}
 for i in `seq 2 9`; do
-	wget -O p$i https://lore.kernel.org/lkml/20201231152401.3162425-$i-almaz.alexandrovich@paragon-software.com/raw
+	wget -O p$i https://lore.kernel.org/lkml/20210402155347.64594-$i-almaz.alexandrovich@paragon-software.com/raw
 	patch -p3 -N -i p$i
 	rm p$i
 done
-patch --ignore-whitespace inode.c << EOT
---- bbb	2021-01-14 23:16:55.718943000 +0200
-+++ aaa	2021-01-14 23:16:56.922941700 +0200
-@@ -695,36 +695,6 @@
+
+wget -O Makefile.patch https://aur.archlinux.org/cgit/aur.git/plain/Makefile.patch?h=ntfs3-dkms
+patch -p0 -N -i "Makefile.patch"
+rm Makefile.patch
+
+patch --ignore-whitespace Makefile << 'EOT'
+--- a/Makefile
++++ b/Makefile
+@@ -37,7 +37,7 @@ ccflags-$(CONFIG_NTFS3_LZX_XPRESS) += -DCONFIG_NTFS3_LZX_XPRESS
+ ccflags-$(CONFIG_NTFS3_FS_POSIX_ACL) += -DCONFIG_NTFS3_FS_POSIX_ACL
+ 
+ all:
+-	make -C /lib/modules/$(KVERSION)/build M=$(PWD) modules
++	make -C /lib/modules/$(KVERSION)/build M=$(shell pwd) modules
+ 
+ clean:
+-	make -C /lib/modules/$(KVERSION)/build M=$(PWD) clean
+\ No newline at end of file
++	make -C /lib/modules/$(KVERSION)/build M=$(shell pwd) clean
+
+EOT
+
+patch --ignore-whitespace fsntfs.c << EOT
+--- a/fsntfs.c
++++ b/fsntfs.c
+@@ -1620,7 +1620,7 @@ int ntfs_bio_fill_1(struct ntfs_sb_info *sbi, const struct runs_tree *run)
+ 		lbo = (u64)lcn << cluster_bits;
+ 		len = (u64)clen << cluster_bits;
+ new_bio:
+-		new = ntfs_alloc_bio(BIO_MAX_VECS);
++		new = ntfs_alloc_bio(BIO_MAX_PAGES);
+ 		if (!new) {
+ 			err = -ENOMEM;
+ 			break;
+EOT
+
+patch --ignore-whitespace ntfs_fs.h << 'EOT'
+--- a/ntfs_fs.h
++++ b/ntfs_fs.h
+@@ -453,11 +453,11 @@ bool dir_is_empty(struct inode *dir);
+ extern const struct file_operations ntfs_dir_operations;
+ 
+ /* globals from file.c*/
+-int ntfs_getattr(struct user_namespace *mnt_userns, const struct path *path,
++int ntfs_getattr(const struct path *path,
+ 		 struct kstat *stat, u32 request_mask, u32 flags);
+ void ntfs_sparse_cluster(struct inode *inode, struct page *page0, CLST vcn,
+ 			 CLST len);
+-int ntfs3_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
++int ntfs3_setattr(struct dentry *dentry,
+ 		  struct iattr *attr);
+ int ntfs_file_open(struct inode *inode, struct file *file);
+ int ntfs_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
+@@ -644,7 +644,7 @@ int ntfs_sync_inode(struct inode *inode);
+ int ntfs_flush_inodes(struct super_block *sb, struct inode *i1,
+ 		      struct inode *i2);
+ int inode_write_data(struct inode *inode, const void *data, size_t bytes);
+-struct inode *ntfs_create_inode(struct user_namespace *mnt_userns,
++struct inode *ntfs_create_inode(
+ 				struct inode *dir, struct dentry *dentry,
+ 				const struct cpu_str *uni, umode_t mode,
+ 				dev_t dev, const char *symname, u32 size,
+@@ -784,17 +784,17 @@ int ntfs_cmp_names_cpu(const struct cpu_str *uni1, const struct le_str *uni2,
+ /* globals from xattr.c */
+ #ifdef CONFIG_NTFS3_FS_POSIX_ACL
+ struct posix_acl *ntfs_get_acl(struct inode *inode, int type);
+-int ntfs_set_acl(struct user_namespace *mnt_userns, struct inode *inode,
++int ntfs_set_acl(struct inode *inode,
+ 		 struct posix_acl *acl, int type);
+-int ntfs_init_acl(struct user_namespace *mnt_userns, struct inode *inode,
++int ntfs_init_acl(struct inode *inode,
+ 		  struct inode *dir);
+ #else
+ #define ntfs_get_acl NULL
+ #define ntfs_set_acl NULL
+ #endif
+ 
+-int ntfs_acl_chmod(struct user_namespace *mnt_userns, struct inode *inode);
+-int ntfs_permission(struct user_namespace *mnt_userns, struct inode *inode,
++int ntfs_acl_chmod(struct inode *inode);
++int ntfs_permission(struct inode *inode,
+ 		    int mask);
+ ssize_t ntfs_listxattr(struct dentry *dentry, char *buffer, size_t size);
+ extern const struct xattr_handler *ntfs_xattr_handlers[];
+EOT
+
+patch --ignore-whitespace file.c << 'EOT'
+--- a/file.c
++++ b/file.c
+@@ -76,7 +76,7 @@ static long ntfs_compat_ioctl(struct file *filp, u32 cmd, unsigned long arg)
+ /*
+  * inode_operations::getattr
+  */
+-int ntfs_getattr(struct user_namespace *mnt_userns, const struct path *path,
++int ntfs_getattr(const struct path *path,
+ 		 struct kstat *stat, u32 request_mask, u32 flags)
+ {
+ 	struct inode *inode = d_inode(path->dentry);
+@@ -90,7 +90,7 @@ int ntfs_getattr(struct user_namespace *mnt_userns, const struct path *path,
+ 
+ 	stat->attributes_mask |= STATX_ATTR_COMPRESSED | STATX_ATTR_ENCRYPTED;
+ 
+-	generic_fillattr(mnt_userns, inode, stat);
++	generic_fillattr(inode, stat);
+ 
+ 	stat->result_mask |= STATX_BTIME;
+ 	stat->btime = ni->i_crtime;
+@@ -614,7 +614,7 @@ out:
+ /*
+  * inode_operations::setattr
+  */
+-int ntfs3_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
++int ntfs3_setattr(struct dentry *dentry,
+ 		  struct iattr *attr)
+ {
+ 	struct super_block *sb = dentry->d_sb;
+@@ -633,7 +633,7 @@ int ntfs3_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
+ 		ia_valid = attr->ia_valid;
+ 	}
+ 
+-	err = setattr_prepare(mnt_userns, dentry, attr);
++	err = setattr_prepare(dentry, attr);
+ 	if (err)
+ 		goto out;
+ 
+@@ -658,10 +658,10 @@ int ntfs3_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
+ 		ni->ni_flags |= NI_FLAG_UPDATE_PARENT;
+ 	}
+ 
+-	setattr_copy(mnt_userns, inode, attr);
++	setattr_copy(inode, attr);
+ 
+ 	if (mode != inode->i_mode) {
+-		err = ntfs_acl_chmod(mnt_userns, inode);
++		err = ntfs_acl_chmod(inode);
+ 		if (err)
+ 			goto out;
+ 
+EOT
+
+patch --ignore-whitespace namei.c << 'EOT'
+--- a/namei.c
++++ b/namei.c
+@@ -102,7 +102,7 @@ static struct dentry *ntfs_lookup(struct inode *dir, struct dentry *dentry,
+  *
+  * inode_operations::create
+  */
+-static int ntfs_create(struct user_namespace *mnt_userns, struct inode *dir,
++static int ntfs_create(struct inode *dir,
+ 		       struct dentry *dentry, umode_t mode, bool excl)
+ {
+ 	struct ntfs_inode *ni = ntfs_i(dir);
+@@ -110,7 +110,7 @@ static int ntfs_create(struct user_namespace *mnt_userns, struct inode *dir,
+ 
+ 	ni_lock_dir(ni);
+ 
+-	inode = ntfs_create_inode(mnt_userns, dir, dentry, NULL, S_IFREG | mode,
++	inode = ntfs_create_inode(dir, dentry, NULL, S_IFREG | mode,
+ 				  0, NULL, 0, excl, NULL);
+ 
+ 	ni_unlock(ni);
+@@ -184,7 +184,7 @@ static int ntfs_unlink(struct inode *dir, struct dentry *dentry)
+  *
+  * inode_operations::symlink
+  */
+-static int ntfs_symlink(struct user_namespace *mnt_userns, struct inode *dir,
++static int ntfs_symlink(struct inode *dir,
+ 			struct dentry *dentry, const char *symname)
+ {
+ 	u32 size = strlen(symname);
+@@ -193,7 +193,7 @@ static int ntfs_symlink(struct user_namespace *mnt_userns, struct inode *dir,
+ 
+ 	ni_lock_dir(ni);
+ 
+-	inode = ntfs_create_inode(mnt_userns, dir, dentry, NULL, S_IFLNK | 0777,
++	inode = ntfs_create_inode(dir, dentry, NULL, S_IFLNK | 0777,
+ 				  0, symname, size, 0, NULL);
+ 
+ 	ni_unlock(ni);
+@@ -206,7 +206,7 @@ static int ntfs_symlink(struct user_namespace *mnt_userns, struct inode *dir,
+  *
+  * inode_operations::mkdir
+  */
+-static int ntfs_mkdir(struct user_namespace *mnt_userns, struct inode *dir,
++static int ntfs_mkdir(struct inode *dir,
+ 		      struct dentry *dentry, umode_t mode)
+ {
+ 	struct inode *inode;
+@@ -214,7 +214,7 @@ static int ntfs_mkdir(struct user_namespace *mnt_userns, struct inode *dir,
+ 
+ 	ni_lock_dir(ni);
+ 
+-	inode = ntfs_create_inode(mnt_userns, dir, dentry, NULL, S_IFDIR | mode,
++	inode = ntfs_create_inode(dir, dentry, NULL, S_IFDIR | mode,
+ 				  0, NULL, -1, 0, NULL);
+ 
+ 	ni_unlock(ni);
+@@ -246,7 +246,7 @@ static int ntfs_rmdir(struct inode *dir, struct dentry *dentry)
+  *
+  * inode_operations::rename
+  */
+-static int ntfs_rename(struct user_namespace *mnt_userns, struct inode *old_dir,
++static int ntfs_rename(struct inode *old_dir,
+ 		       struct dentry *old_dentry, struct inode *new_dir,
+ 		       struct dentry *new_dentry, u32 flags)
+ {
+@@ -520,7 +520,7 @@ static int ntfs_atomic_open(struct inode *dir, struct dentry *dentry,
+ 
+ 	/*fnd contains tree's path to insert to*/
+ 	/* TODO: init_user_ns? */
+-	inode = ntfs_create_inode(&init_user_ns, dir, dentry, uni, mode, 0,
++	inode = ntfs_create_inode(dir, dentry, uni, mode, 0,
+ 				  NULL, 0, excl, fnd);
+ 	err = IS_ERR(inode) ? PTR_ERR(inode)
+ 			    : finish_open(file, dentry, ntfs_file_open);
+EOT
+
+patch --ignore-whitespace xattr.c << 'EOT'
+--- a/xattr.c
++++ b/xattr.c
+@@ -473,7 +473,7 @@ static inline void ntfs_posix_acl_release(struct posix_acl *acl)
+ 		kfree(acl);
+ }
+ 
+-static struct posix_acl *ntfs_get_acl_ex(struct user_namespace *mnt_userns,
++static struct posix_acl *ntfs_get_acl_ex(
+ 					 struct inode *inode, int type,
+ 					 int locked)
+ {
+@@ -509,7 +509,7 @@ static struct posix_acl *ntfs_get_acl_ex(struct user_namespace *mnt_userns,
+ 
+ 	/* Translate extended attribute to acl */
+ 	if (err > 0) {
+-		acl = posix_acl_from_xattr(mnt_userns, buf, err);
++		acl = posix_acl_from_xattr(&init_user_ns, buf, err);
+ 		if (!IS_ERR(acl))
+ 			set_cached_acl(inode, type, acl);
+ 	} else {
+@@ -529,10 +529,10 @@ static struct posix_acl *ntfs_get_acl_ex(struct user_namespace *mnt_userns,
+ struct posix_acl *ntfs_get_acl(struct inode *inode, int type)
+ {
+ 	/* TODO: init_user_ns? */
+-	return ntfs_get_acl_ex(&init_user_ns, inode, type, 0);
++	return ntfs_get_acl_ex(inode, type, 0);
+ }
+ 
+-static noinline int ntfs_set_acl_ex(struct user_namespace *mnt_userns,
++static noinline int ntfs_set_acl_ex(
+ 				    struct inode *inode, struct posix_acl *acl,
+ 				    int type, int locked)
+ {
+@@ -590,7 +590,7 @@ static noinline int ntfs_set_acl_ex(struct user_namespace *mnt_userns,
+ 	if (!value)
+ 		return -ENOMEM;
+ 
+-	err = posix_acl_to_xattr(mnt_userns, acl, value, size);
++	err = posix_acl_to_xattr(&init_user_ns, acl, value, size);
+ 	if (err)
+ 		goto out;
+ 
+@@ -614,13 +614,13 @@ out:
+  *
+  * inode_operations::set_acl
+  */
+-int ntfs_set_acl(struct user_namespace *mnt_userns, struct inode *inode,
++int ntfs_set_acl(struct inode *inode,
+ 		 struct posix_acl *acl, int type)
+ {
+-	return ntfs_set_acl_ex(mnt_userns, inode, acl, type, 0);
++	return ntfs_set_acl_ex(inode, acl, type, 0);
+ }
+ 
+-static int ntfs_xattr_get_acl(struct user_namespace *mnt_userns,
++static int ntfs_xattr_get_acl(
+ 			      struct inode *inode, int type, void *buffer,
+ 			      size_t size)
+ {
+@@ -637,13 +637,13 @@ static int ntfs_xattr_get_acl(struct user_namespace *mnt_userns,
+ 	if (!acl)
+ 		return -ENODATA;
+ 
+-	err = posix_acl_to_xattr(mnt_userns, acl, buffer, size);
++	err = posix_acl_to_xattr(&init_user_ns, acl, buffer, size);
+ 	ntfs_posix_acl_release(acl);
+ 
+ 	return err;
+ }
+ 
+-static int ntfs_xattr_set_acl(struct user_namespace *mnt_userns,
++static int ntfs_xattr_set_acl(
+ 			      struct inode *inode, int type, const void *value,
+ 			      size_t size)
+ {
+@@ -653,23 +653,23 @@ static int ntfs_xattr_set_acl(struct user_namespace *mnt_userns,
+ 	if (!(inode->i_sb->s_flags & SB_POSIXACL))
+ 		return -EOPNOTSUPP;
+ 
+-	if (!inode_owner_or_capable(mnt_userns, inode))
++	if (!inode_owner_or_capable(inode))
+ 		return -EPERM;
+ 
+ 	if (!value)
+ 		return 0;
+ 
+-	acl = posix_acl_from_xattr(mnt_userns, value, size);
++	acl = posix_acl_from_xattr(&init_user_ns, value, size);
+ 	if (IS_ERR(acl))
+ 		return PTR_ERR(acl);
+ 
+ 	if (acl) {
+-		err = posix_acl_valid(mnt_userns, acl);
++		err = posix_acl_valid(&init_user_ns, acl);
+ 		if (err)
+ 			goto release_and_out;
+ 	}
+ 
+-	err = ntfs_set_acl(mnt_userns, inode, acl, type);
++	err = ntfs_set_acl(inode, acl, type);
+ 
+ release_and_out:
+ 	ntfs_posix_acl_release(acl);
+@@ -679,7 +679,7 @@ release_and_out:
+ /*
+  * Initialize the ACLs of a new inode. Called from ntfs_create_inode.
+  */
+-int ntfs_init_acl(struct user_namespace *mnt_userns, struct inode *inode,
++int ntfs_init_acl(struct inode *inode,
+ 		  struct inode *dir)
+ {
+ 	struct posix_acl *default_acl, *acl;
+@@ -691,7 +691,7 @@ int ntfs_init_acl(struct user_namespace *mnt_userns, struct inode *inode,
+ 	 */
+ 	inode->i_default_acl = NULL;
+ 
+-	default_acl = ntfs_get_acl_ex(mnt_userns, dir, ACL_TYPE_DEFAULT, 1);
++	default_acl = ntfs_get_acl_ex(dir, ACL_TYPE_DEFAULT, 1);
+ 
+ 	if (!default_acl || default_acl == ERR_PTR(-EOPNOTSUPP)) {
+ 		inode->i_mode &= ~current_umask();
+@@ -719,13 +719,13 @@ int ntfs_init_acl(struct user_namespace *mnt_userns, struct inode *inode,
+ 	}
+ 
+ 	if (default_acl)
+-		err = ntfs_set_acl_ex(mnt_userns, inode, default_acl,
++		err = ntfs_set_acl_ex(inode, default_acl,
+ 				      ACL_TYPE_DEFAULT, 1);
+ 
+ 	if (!acl)
+ 		inode->i_acl = NULL;
+ 	else if (!err)
+-		err = ntfs_set_acl_ex(mnt_userns, inode, acl, ACL_TYPE_ACCESS,
++		err = ntfs_set_acl_ex(inode, acl, ACL_TYPE_ACCESS,
+ 				      1);
+ 
+ 	posix_acl_release(acl);
+@@ -742,7 +742,7 @@ out:
+  *
+  * helper for 'ntfs3_setattr'
+  */
+-int ntfs_acl_chmod(struct user_namespace *mnt_userns, struct inode *inode)
++int ntfs_acl_chmod(struct inode *inode)
+ {
+ 	struct super_block *sb = inode->i_sb;
+ 
+@@ -752,7 +752,7 @@ int ntfs_acl_chmod(struct user_namespace *mnt_userns, struct inode *inode)
+ 	if (S_ISLNK(inode->i_mode))
+ 		return -EOPNOTSUPP;
+ 
+-	return posix_acl_chmod(mnt_userns, inode, inode->i_mode);
++	return posix_acl_chmod(inode, inode->i_mode);
+ }
+ 
+ /*
+@@ -760,7 +760,7 @@ int ntfs_acl_chmod(struct user_namespace *mnt_userns, struct inode *inode)
+  *
+  * inode_operations::permission
+  */
+-int ntfs_permission(struct user_namespace *mnt_userns, struct inode *inode,
++int ntfs_permission(struct inode *inode,
+ 		    int mask)
+ {
+ 	if (ntfs_sb(inode->i_sb)->options.no_acs_rules) {
+@@ -768,7 +768,7 @@ int ntfs_permission(struct user_namespace *mnt_userns, struct inode *inode,
+ 		return 0;
+ 	}
+ 
+-	return generic_permission(mnt_userns, inode, mask);
++	return generic_permission(inode, mask);
+ }
+ 
+ /*
+@@ -882,7 +882,7 @@ static int ntfs_getxattr(const struct xattr_handler *handler, struct dentry *de,
+ 		     sizeof(XATTR_NAME_POSIX_ACL_DEFAULT)))) {
+ 		/* TODO: init_user_ns? */
+ 		err = ntfs_xattr_get_acl(
+-			&init_user_ns, inode,
++			inode,
+ 			name_len == sizeof(XATTR_NAME_POSIX_ACL_ACCESS) - 1
+ 				? ACL_TYPE_ACCESS
+ 				: ACL_TYPE_DEFAULT,
+@@ -903,7 +903,6 @@ out:
+  * inode_operations::setxattr
+  */
+ static noinline int ntfs_setxattr(const struct xattr_handler *handler,
+-				  struct user_namespace *mnt_userns,
+ 				  struct dentry *de, struct inode *inode,
+ 				  const char *name, const void *value,
+ 				  size_t size, int flags)
+@@ -1013,7 +1012,7 @@ set_new_fa:
+ 		     sizeof(XATTR_NAME_POSIX_ACL_DEFAULT)))) {
+ 		/* TODO: init_user_ns? */
+ 		err = ntfs_xattr_set_acl(
+-			&init_user_ns, inode,
++			inode,
+ 			name_len == sizeof(XATTR_NAME_POSIX_ACL_ACCESS) - 1
+ 				? ACL_TYPE_ACCESS
+ 				: ACL_TYPE_DEFAULT,
+EOT
+
+patch --ignore-whitespace inode.c << 'EOT'
+--- a/inode.c
++++ b/inode.c
+@@ -696,36 +696,6 @@ static int ntfs_readpage(struct file *file, struct page *page)
  	return mpage_readpage(page, ntfs_get_block);
  }
-
+ 
 -static void ntfs_readahead(struct readahead_control *rac)
 -{
 -	struct address_space *mapping = rac->mapping;
@@ -91,28 +524,42 @@ patch --ignore-whitespace inode.c << EOT
 -}
 -
  static int ntfs_get_block_direct_IO_R(struct inode *inode, sector_t iblock,
-
  				      struct buffer_head *bh_result, int create)
  {
-@@ -2036,7 +2006,6 @@
-
+@@ -1176,7 +1146,7 @@ out:
+ 	return ERR_PTR(err);
+ }
+ 
+-struct inode *ntfs_create_inode(struct user_namespace *mnt_userns,
++struct inode *ntfs_create_inode(
+ 				struct inode *dir, struct dentry *dentry,
+ 				const struct cpu_str *uni, umode_t mode,
+ 				dev_t dev, const char *symname, u32 size,
+@@ -1577,7 +1547,7 @@ struct inode *ntfs_create_inode(struct user_namespace *mnt_userns,
+ 
+ #ifdef CONFIG_NTFS3_FS_POSIX_ACL
+ 	if (!is_link && (sb->s_flags & SB_POSIXACL)) {
+-		err = ntfs_init_acl(mnt_userns, inode, dir);
++		err = ntfs_init_acl(inode, dir);
+ 		if (err)
+ 			goto out6;
+ 	} else
+@@ -2018,7 +1988,6 @@ const struct inode_operations ntfs_link_inode_operations = {
+ 
  const struct address_space_operations ntfs_aops = {
  	.readpage = ntfs_readpage,
 -	.readahead = ntfs_readahead,
-
  	.writepage = ntfs_writepage,
  	.writepages = ntfs_writepages,
  	.write_begin = ntfs_write_begin,
-@@ -2047,5 +2016,4 @@
-
+@@ -2029,5 +1998,4 @@ const struct address_space_operations ntfs_aops = {
+ 
  const struct address_space_operations ntfs_aops_cmpr = {
  	.readpage = ntfs_readpage,
 -	.readahead = ntfs_readahead,
  };
 EOT
-wget -O Makefile.patch https://aur.archlinux.org/cgit/aur.git/plain/Makefile.patch?h=ntfs3-dkms
-patch -p0 -N -i "Makefile.patch"
-rm Makefile.patch
+
 wget -O dkms.conf https://aur.archlinux.org/cgit/aur.git/plain/dkms.conf?h=ntfs3-dkms
 echo 'MODULE_INFO(intree, "Y");' >> super.c
 dkms add -m ${pkgname} -v ${pkgver}
@@ -154,7 +601,7 @@ I also provide an uninstall script, in case you want to completely get rid of th
 {% highlight bash%}
 #!/bin/bash
 pkgname=ntfs3
-pkgver=17.0.0
+pkgver=26.0.0
 prefix=/usr/src
 
 rmmod ntfs3
