@@ -3,7 +3,7 @@ layout: post
 title:  "Binary patching Arduino programs"
 date:   2021-05-05 00:00:00 +0000
 categories: 
-excerpt: "I have recently changed the subnet of my home network *because reasons*. The old subnet was 192.168.105.0/24, while the new subnet is 10.1.1.0/24. This poses a challenge because, in order to save up on precious program memory, my homepi+ Arduino has a static IP set (this way, I do not have to compile in the DHCP code which is pretty large). So, I have to change the IP in the Arduino. Sure, I can recompile the program and flash it on the Arduino, but, as I said, I have hit a golden master, I want the same program output and just to change 3 bytes in the IP address. So, binary patching it is then."
+excerpt: "I have recently changed the subnet of my home network because reasons. The old subnet was 192.168.105.0/24, while the new subnet is 10.1.1.0/24. This poses a challenge because, in order to save up on precious program memory, my homepi+ Arduino has a static IP set (this way, I do not have to compile in the DHCP code which is pretty large). So, I have to change the IP in the Arduino. Sure, I can recompile the program and flash it on the Arduino, but, as I said, I have hit a golden master, I want the same program output and just to change 3 bytes in the IP address. So, binary patching it is then."
 ---
 
 As you may already know, I am quite a fan of Arduinos. Not that I think C++ is really necessary on a microcontroller of its size, but rather I appreciate the fairly good documentation and awesome community and libraries that's built around it. All in all, the ecosystem is pretty great.
