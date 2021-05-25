@@ -6,6 +6,8 @@ categories:
 excerpt: If you use the light system theme in Windows 10, command windows usually have a dark background with a white titlebar, which totally kills your eyes no matter the time of the day. This articles shows you how to determine a binary patch for the system file responsible for this.
 ---
 
+Update (25/5/2021): Another strategy: try finding *0f8588eb0100* and replacing with *0f8488eb0100*.
+
 TL;DR
 
 1. Make a copy conhost.exe from System32.
