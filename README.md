@@ -1,3 +1,3 @@
 ## valinet.ro
 
-This is the source code for the valinet.ro web site.
+This is the source for the valinet.ro web site.
