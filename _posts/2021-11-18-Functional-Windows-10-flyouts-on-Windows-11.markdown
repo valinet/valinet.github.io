@@ -192,7 +192,7 @@ This thought didn't really came that out of the blue. For the better part of a w
 
 Also, since we are talking about that, as I learned when I studied the language switcher, there is some global flag in the network flyout implementation, let's called it generically, that determines what mode to show. The implementation mostly lives in `C:\Windows\ShellExperiences\NetworkUX.dll`. In there, look for a method called `NetworkUX::ViewContext::SetNetworkUXMode`. That's the single thing that sets a global variable that is used all around the place to determine the type of UX to show, called `s_networkUXMode`. 
 
-The desktop seems to set `s_networkUXMode` to 0. The lock screen sets that to 7. There are also other interesting modes: the Windows 10 OOBE screen is 4, the Windows 11 one is 5 if I remember correctly. Find out for yourself. The assembly instructions where that is set look like:
+The desktop seems to set `s_networkUXMode` to 0. The lock screen sets that to 7 (also, it cannot be launched in desktop mode, it crashes for some other reason which needs to be investigated as well). There are also other interesting modes: the Windows 10 OOBE screen is 4, the Windows 11 one is 5 if I remember correctly. Find out for yourself. The assembly instructions where that is set look like:
 
 ```
 .text:000000018006BC0C                 mov     Ns_networkUXMode, edi ; 
@@ -721,8 +721,10 @@ The result?
 
 ### Conclusion
 
-Life's beautiful =))) This is tiring.
+Life's beautiful =))) 
 
 Not the most beautiful patches in the world, but they work out rather nicely. Quite some stuff has been achieved with the limited resources available at our disposal. Of course, Microsoft fixing the interface would still be the preferable option, like, in some cases, it only takes 2 bytes give or take, but they chose to deliver a label-less taskbar instead, that's simply a productivity nightmare. Oh, well... at least [ExplorerPatcher](https://github.com/valinet/ExplorerPatcher) exists.
 
 Yeah, a long post, but hopefully it gave you some ideas. Let's hack away!
+
+P.S. Before asking, no, the 2 battery icons are not some "side effect" or a bug or anything like that: one is Windows' icon, and the other is the icon of the excellent and versatile [Battery Mode](https://github.com/tarcode-apps/BatteryMode) app one can use as a better replacement to what Windows offers in any of its modes.
