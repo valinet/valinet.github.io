@@ -717,7 +717,7 @@ https://github.com/valinet/ExplorerPatcher/blob/ff26abe9a39fb90510450356ba2a807f
 
 The result?
 
-![image](https://user-images.githubusercontent.com/6503598/142456179-fac052e2-4866-46d6-bd6f-0954c2094aa3.png)
+![image](https://user-images.githubusercontent.com/6503598/142456688-87640438-7812-467f-ad1b-00e1db8a594d.png)
 
 ### Conclusion
 
