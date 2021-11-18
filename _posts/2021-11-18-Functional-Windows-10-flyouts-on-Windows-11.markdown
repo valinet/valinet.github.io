@@ -717,7 +717,7 @@ https://github.com/valinet/ExplorerPatcher/blob/ff26abe9a39fb90510450356ba2a807f
 
 The result?
 
-![image-20211118174828628](C:\Users\root\AppData\Roaming\Typora\typora-user-images\image-20211118174828628.png)
+![image-20211118174828628](https://user-images.githubusercontent.com/6503598/142454619-7954e217-3965-4796-9540-00ad58a9f149.png)
 
 ### Conclusion
 
