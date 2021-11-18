@@ -270,7 +270,7 @@ Drop the file instead of the original `Windows.UI.QuickActions.dll` near `ShellE
 
 YEEEEEY!!! Call it sheer luck or whatever, but it works. The battery fix came for free as well, after this, as it seemed to suffer from the same thing:
 
-![image](https://user-images.githubusercontent.com/6503598/142405768-9d52ee39-314a-4e28-bc08-fb78a1ec9f44.png)
+![image-20211118174828628](https://user-images.githubusercontent.com/6503598/142454619-7954e217-3965-4796-9540-00ad58a9f149.png)
 
 Okay, so it's only 2 bytes Microsoft had to fix to make this happen, but yet again I have to come and clean up the mess...? Well, almost. See, there's a caveat with this: it enables this behavior generally in `ShellExperienceHost.exe`. Try launching `ms-availablenetworks:`, which in Windows 11 should open a list like this:
 
@@ -717,7 +717,7 @@ https://github.com/valinet/ExplorerPatcher/blob/ff26abe9a39fb90510450356ba2a807f
 
 The result?
 
-![image-20211118174828628](https://user-images.githubusercontent.com/6503598/142454619-7954e217-3965-4796-9540-00ad58a9f149.png)
+![image](https://user-images.githubusercontent.com/6503598/142456179-fac052e2-4866-46d6-bd6f-0954c2094aa3.png)
 
 ### Conclusion
 
