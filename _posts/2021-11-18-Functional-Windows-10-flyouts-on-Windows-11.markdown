@@ -186,35 +186,34 @@ We find that function quickly, among the sea of symbols, especially if we search
 
 That code area gets called if either branch of some `if` check eventually fails. So we're presumably on one of the branches. Without looking too much beside that, I thought: what if we would be on the other branch? A small note on that:
 
-{
-
-This thought didn't really came that out of the blue. For the better part of a whole day, I started trying to find a way to do the same thing the lock screen (`LockApp.exe`) does: that can show the Windows 10 network flyout just fine. So I knew that has to be in some other condition, and I intially thought that maybe this `if` check here is the determinant for the lock screen's working condition versus it failing on the desktop. Again, just a wild guess.
-
-Also, since we are talking about that, as I learned when I studied the language switcher, there is some global flag in the network flyout implementation, let's called it generically, that determines what mode to show. The implementation mostly lives in `C:\Windows\ShellExperiences\NetworkUX.dll`. In there, look for a method called `NetworkUX::ViewContext::SetNetworkUXMode`. That's the single thing that sets a global variable that is used all around the place to determine the type of UX to show, called `s_networkUXMode`. 
-
-The desktop seems to set `s_networkUXMode` to 0. The lock screen sets that to 7 (also, it cannot be launched in desktop mode, it crashes for some other reason which needs to be investigated as well). There are also other interesting modes: the Windows 10 OOBE screen is 4, which looks quite funny when enabled instead of the regular one:
-
-![image](https://user-images.githubusercontent.com/6503598/142466279-066793bf-4d81-486b-9115-ed4313b82bf1.png)
-
-The Windows 11 one is 5 if I remember correctly. Find out for yourself. The assembly instructions where that is set look like:
-
-```
-.text:000000018006BC0C                 mov     Ns_networkUXMode, edi ; 
-.text:000000018006BC12                 mov     rcx, [rbp+var_8]
-.text:000000018006BC16                 xor     rcx, rsp        ; StackCookie
-.text:000000018006BC19                 call    __security_check_cookie
-```
-
-So, there's plenty of space to write something like:
-
-```
-mov     edi, 7
-mov     Ns_networkUXMode, edi ; 
-```
-
-Just `nop` the stack protector check to gain the necessary space and make sure to adjust that relative `mov     Ns_networkUXMode, edi ;` if you shift it a few bytes down due to the `mov edi, 7`.
-
-}
+> This thought didn't really came that out of the blue. For the better part of a whole day, I started trying to find a way to do the same thing the lock screen (`LockApp.exe`) does: that can show the Windows 10 network flyout just fine. So I knew that has to be in some other condition, and I intially thought that maybe this `if` check here is the determinant for the lock screen's working condition versus it failing on the desktop. Again, just a wild guess.
+>
+> Also, since we are talking about that, as I learned when I studied the language switcher, there is some global flag in the network flyout implementation, let's called it generically, that determines what mode to show. The implementation mostly lives in `C:\Windows\ShellExperiences\NetworkUX.dll`. In there, look for a method called `NetworkUX::ViewContext::SetNetworkUXMode`. That's the single thing that sets a global variable that is used all around the place to determine the type of UX to show, called `s_networkUXMode`. 
+>
+> The desktop seems to set `s_networkUXMode` to 0. The lock screen sets that to 7 (also, it cannot be launched in desktop mode, it crashes for some other reason which needs to be investigated as well). There are also other interesting modes: the Windows 10 OOBE screen is 4, which looks quite funny when enabled instead of the regular one:
+>
+> ![image](https://user-images.githubusercontent.com/6503598/142466279-066793bf-4d81-486b-9115-ed4313b82bf1.png)
+>
+> And no, clicking Next does not advance you to the next in the "desktop OOBE" =)))
+>
+> The Windows 11 one is 5 if I remember correctly. Find out for yourself. The assembly instructions where that is set look like:
+>
+> ```
+> .text:000000018006BC0C                 mov     Ns_networkUXMode, edi ; 
+> .text:000000018006BC12                 mov     rcx, [rbp+var_8]
+> .text:000000018006BC16                 xor     rcx, rsp        ; StackCookie
+> .text:000000018006BC19                 call    __security_check_cookie
+> ```
+>
+> So, there's plenty of space to write something like:
+>
+> ```
+> mov     edi, 7
+> mov     Ns_networkUXMode, edi ; 
+> ```
+>
+> Just `nop` the stack protector check to gain the necessary space and make sure to adjust that relative `mov     Ns_networkUXMode, edi ;` if you shift it a few bytes down due to the `mov edi, 7`.
+>
 
 Back to the main story, so what if we would be on the other branch? What controls that `if` check? Scrolling a few lines above, we see this pseudocode:
 
