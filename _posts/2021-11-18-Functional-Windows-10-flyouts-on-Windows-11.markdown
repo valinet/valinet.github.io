@@ -26,7 +26,7 @@ These usually live in `twinui.dll`. At least the ones common to all types of Win
 
 So, by looking on some disassembly in `twinui.dll`, I figured out that the way to invoke these flyouts is something like this:
 
-```c
+```cpp
 void InvokeFlyout(BOOL bAction, DWORD dwWhich)
 {
     HRESULT hr = S_OK;
@@ -217,7 +217,7 @@ That code area gets called if either branch of some `if` check eventually fails.
 
 Back to the main story, so what if we would be on the other branch? What controls that `if` check? Scrolling a few lines above, we see this pseudocode:
 
-```c
+```cpp
     {
       Init_thread_header(&dword_18057130C);
       if ( dword_18057130C == -1 )
@@ -311,7 +311,7 @@ Now, what do we do once we get to execute code in the target? We need to patch t
 
 I feel lucky today, or rather, I feel that some things in that function are pretty unique and likely not to change based on my previous experiences diassembling Microsoft's stuff, so I will go with this. The reason is also that I want to try to minimize the symbols fiasco (Microsoft recently delays publishing the symbols for some unknown reason for some builds, and then people running beta builds start flooding the forums with requests for me to "fix" it); it's just one thing to patch, I don't want to introduce the need for other symbols, and if we anyway have 2 methods of hooking stuff already present in ExplorerPatcher, what can a third one do...?
 
-```c
+```cpp
 void InjectShellExperienceHost()
 {
 #ifdef _WIN64
@@ -453,7 +453,7 @@ Control Panel\Quick Actions\Control Center\QuickActionsStateCapture
 
 So, to finish this off, to signal the legacy mode, when it's time to invoke the network/battery flyout, I create an `ExplorerPatcher` key in there. When our library gets injected in `ShellExperienceHost.exe`, we check whether that key exists and only then patch the executable; add this to the function above, right at the beginning:
 
-```c
+```cpp
     HKEY hKey;
     if (RegOpenKeyW(HKEY_CURRENT_USER, _T(SEH_REGPATH), &hKey))
     {
@@ -478,7 +478,7 @@ So, what to do? Naturally, disassemble their executables and see how they do it.
 
 I looked again though `explorer.exe`: in one of its `CoCreateInstance` calls, it requests some `IID_InputSwitchControl` interface from `CLSID_InputSwitchControl` (actual GUIDs are in ExplorerPatcher's source code):
 
-```c
+```cpp
 __int64 __fastcall CTrayInputIndicator::_RegisterInputSwitch(CTrayInputIndicator *this)
 {
   LPVOID *ppv; // rbx
@@ -534,19 +534,19 @@ Is this the virtual table we're after?
 
 If we look back on the disassembly from `explorer.exe`, we see 2 calls are made for functions within this interface:
 
-```c
+```cpp
 Instance = (*(__int64 (__fastcall **)(LPVOID, _QWORD))(*(_QWORD *)*ppv + 24i64))(*ppv, 0i64);
 ```
 
 And
 
-```c
+```cpp
 (*(void (__fastcall **)(LPVOID, char *))(*(_QWORD *)*ppv + 32i64))(*ppv, (char *)this + 16);
 ```
 
 That means the first 2 functions after `QueryInterface`, `AddRef` and `Release`, which would mean `Init` and `SetCallback` from above. Besides obviously checking at runtime (it's easy since the called library is an in-process server and handler), we can also be more sure by looking at the second call, specifically how it sends a pointer, `(char *)this + 16` to the library. That's equivalent to `(_QWORD*)this + 2` (an INT64 or QWORD is made up of 8 bytes or chars). If we look in the constructor of `CTrayInputIndicator` from `explorer.exe` (`CTrayInputIndicator::CTrayInputIndicator`), we see this on the first lines:
 
-```c
+```cpp
   *(_QWORD *)this = &CTrayInputIndicator::`vftable'{for `CImpWndProc'};
   *((_QWORD *)this + 2) = &CTrayInputIndicator::`vftable'{for `IInputSwitchCallback'};
   *((_QWORD *)this + 1) = 0i64;
@@ -558,13 +558,13 @@ Now, how do you use this?
 
 As shown above. First of all you initialize the input switch control by calling `Init` with a paramater 0. What's that 0? Let's see what `InputSwitchControl.dll` does with it; it's a long function (`CInputSwitchControl::_Init`), but at some point it does this:
 
-```c
+```cpp
 v5 = IsUtil::MapClientTypeToString(a2);
 ```
 
 Sounds very interesting. And it looks even better:
 
-```c
+```cpp
 const wchar_t *__fastcall IsUtil::MapClientTypeToString(int a1)
 {
   int v1; // ecx
@@ -620,13 +620,13 @@ CTrayInputIndicator::OnTouchKeyboardManualInvoke(void)
 
 The method of interest for me in my window switcher was `OnUpdateProfile`, so I looked a bit on that. By trial and error and looking around, I determined its signature to actually be something like:
 
-```c
+```cpp
 static HRESULT STDMETHODCALLTYPE _IInputSwitchCallback_OnUpdateProfile(IInputSwitchCallback* _this, IInputSwitchCallbackUpdateData *ud)
 ```
 
 Where the `IInputSwitchCallbackUpdateData` looks like this:
 
-```c
+```cpp
 typedef struct IInputSwitchCallbackUpdateData
 {
     DWORD dwID; // OK
@@ -684,7 +684,7 @@ Maybe patching the virtual table of the COM interface could be a solution, but i
 
 For this, I instead obted to hack it away, by observing that `edx` is never changed beside that `xor edx, edx`. So, I just have to neuter that, and then set it myself and immediatly return from my `CoCreateInstance` hook. Like this:
 
-```c
+```cpp
 //globals:
 char mov_edx_val[6] = { 0xBA, 0x00, 0x00, 0x00, 0x00, 0xC3 };
 char* ep_pf = NULL;
