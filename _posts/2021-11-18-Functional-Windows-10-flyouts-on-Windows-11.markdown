@@ -26,7 +26,7 @@ These usually live in `twinui.dll`. At least the ones common to all types of Win
 
 So, by looking on some disassembly in `twinui.dll`, I figured out that the way to invoke these flyouts is something like this:
 
-```
+```c
 void InvokeFlyout(BOOL bAction, DWORD dwWhich)
 {
     HRESULT hr = S_OK;
@@ -198,7 +198,7 @@ That code area gets called if either branch of some `if` check eventually fails.
 >
 > The Windows 11 one is 5 if I remember correctly. Find out for yourself. The assembly instructions where that is set look like:
 >
-> ```
+> ```asm
 > .text:000000018006BC0C                 mov     Ns_networkUXMode, edi ; 
 > .text:000000018006BC12                 mov     rcx, [rbp+var_8]
 > .text:000000018006BC16                 xor     rcx, rsp        ; StackCookie
@@ -207,7 +207,7 @@ That code area gets called if either branch of some `if` check eventually fails.
 >
 > So, there's plenty of space to write something like:
 >
-> ```
+> ```asm
 > mov     edi, 7
 > mov     Ns_networkUXMode, edi ; 
 > ```
@@ -217,7 +217,7 @@ That code area gets called if either branch of some `if` check eventually fails.
 
 Back to the main story, so what if we would be on the other branch? What controls that `if` check? Scrolling a few lines above, we see this pseudocode:
 
-```
+```c
     {
       Init_thread_header(&dword_18057130C);
       if ( dword_18057130C == -1 )
@@ -235,7 +235,7 @@ That `byte_180571308` is the `if` check we are talking about. So it seems that t
 
 Looking on the disassembly, the ending is something like:
 
-```
+```asm
 .text:00000001800407C9                 mov     r8b, 3
 .text:00000001800407CC                 mov     dl, 1
 .text:00000001800407CE                 lea     rcx, ?impl@?1??GetImpl@?$Feature@U__WilFeatureTraits_Feature_TestNM@@@wil@@CAAEAV?$FeatureImpl@U__WilFeatureTraits_Feature_TestNM@@@details@3@XZ@4V453@A ; wil::details::FeatureImpl<__WilFeatureTraits_Feature_TestNM> `wil::Feature<__WilFeatureTraits_Feature_TestNM>::GetImpl(void)'::`2'::impl
@@ -255,7 +255,7 @@ Looking on the disassembly, the ending is something like:
 
 Coresponding to pseudocode looking like this:
 
-```
+```asm
   LOBYTE(v4) = 3;
   LOBYTE(v3) = 1;
   wil::details::FeatureImpl<__WilFeatureTraits_Feature_TestNM>::ReportUsage(
@@ -311,7 +311,7 @@ Now, what do we do once we get to execute code in the target? We need to patch t
 
 I feel lucky today, or rather, I feel that some things in that function are pretty unique and likely not to change based on my previous experiences diassembling Microsoft's stuff, so I will go with this. The reason is also that I want to try to minimize the symbols fiasco (Microsoft recently delays publishing the symbols for some unknown reason for some builds, and then people running beta builds start flooding the forums with requests for me to "fix" it); it's just one thing to patch, I don't want to introduce the need for other symbols, and if we anyway have 2 methods of hooking stuff already present in ExplorerPatcher, what can a third one do...?
 
-```
+```c
 void InjectShellExperienceHost()
 {
 #ifdef _WIN64
@@ -414,7 +414,7 @@ void InjectShellExperienceHost()
 
 Firstly, I match by this pattern:
 
-```
+```asm
 .text:00000001800407DA                 mov     al, 1
 .text:00000001800407DC                 jmp     short loc_1800407E0
 .text:00000001800407DE ; ---------------------------------------------------------------------------
@@ -430,7 +430,7 @@ Firstly, I match by this pattern:
 
 Then skip some bytes (the load address of and function call to that address, some telemetry call) and try to match this which is also a pattern I have seen in many of their libraries, I haven't bothered to understand but it seems to stay there:
 
-```
+```asm
 .text:00000001800407C9                 mov     r8b, 3
 .text:00000001800407CC                 mov     dl, 1
 ```
@@ -453,7 +453,7 @@ Control Panel\Quick Actions\Control Center\QuickActionsStateCapture
 
 So, to finish this off, to signal the legacy mode, when it's time to invoke the network/battery flyout, I create an `ExplorerPatcher` key in there. When our library gets injected in `ShellExperienceHost.exe`, we check whether that key exists and only then patch the executable; add this to the function above, right at the beginning:
 
-```
+```c
     HKEY hKey;
     if (RegOpenKeyW(HKEY_CURRENT_USER, _T(SEH_REGPATH), &hKey))
     {
@@ -478,7 +478,7 @@ So, what to do? Naturally, disassemble their executables and see how they do it.
 
 I looked again though `explorer.exe`: in one of its `CoCreateInstance` calls, it requests some `IID_InputSwitchControl` interface from `CLSID_InputSwitchControl` (actual GUIDs are in ExplorerPatcher's source code):
 
-```
+```c
 __int64 __fastcall CTrayInputIndicator::_RegisterInputSwitch(CTrayInputIndicator *this)
 {
   LPVOID *ppv; // rbx
@@ -534,19 +534,19 @@ Is this the virtual table we're after?
 
 If we look back on the disassembly from `explorer.exe`, we see 2 calls are made for functions within this interface:
 
-```
+```c
 Instance = (*(__int64 (__fastcall **)(LPVOID, _QWORD))(*(_QWORD *)*ppv + 24i64))(*ppv, 0i64);
 ```
 
 And
 
-```
+```c
 (*(void (__fastcall **)(LPVOID, char *))(*(_QWORD *)*ppv + 32i64))(*ppv, (char *)this + 16);
 ```
 
 That means the first 2 functions after `QueryInterface`, `AddRef` and `Release`, which would mean `Init` and `SetCallback` from above. Besides obviously checking at runtime (it's easy since the called library is an in-process server and handler), we can also be more sure by looking at the second call, specifically how it sends a pointer, `(char *)this + 16` to the library. That's equivalent to `(_QWORD*)this + 2` (an INT64 or QWORD is made up of 8 bytes or chars). If we look in the constructor of `CTrayInputIndicator` from `explorer.exe` (`CTrayInputIndicator::CTrayInputIndicator`), we see this on the first lines:
 
-```
+```c
   *(_QWORD *)this = &CTrayInputIndicator::`vftable'{for `CImpWndProc'};
   *((_QWORD *)this + 2) = &CTrayInputIndicator::`vftable'{for `IInputSwitchCallback'};
   *((_QWORD *)this + 1) = 0i64;
@@ -558,13 +558,13 @@ Now, how do you use this?
 
 As shown above. First of all you initialize the input switch control by calling `Init` with a paramater 0. What's that 0? Let's see what `InputSwitchControl.dll` does with it; it's a long function (`CInputSwitchControl::_Init`), but at some point it does this:
 
-```
+```c
 v5 = IsUtil::MapClientTypeToString(a2);
 ```
 
 Sounds very interesting. And it looks even better:
 
-```
+```c
 const wchar_t *__fastcall IsUtil::MapClientTypeToString(int a1)
 {
   int v1; // ecx
@@ -620,13 +620,13 @@ CTrayInputIndicator::OnTouchKeyboardManualInvoke(void)
 
 The method of interest for me in my window switcher was `OnUpdateProfile`, so I looked a bit on that. By trial and error and looking around, I determined its signature to actually be something like:
 
-```
+```c
 static HRESULT STDMETHODCALLTYPE _IInputSwitchCallback_OnUpdateProfile(IInputSwitchCallback* _this, IInputSwitchCallbackUpdateData *ud)
 ```
 
 Where the `IInputSwitchCallbackUpdateData` looks like this:
 
-```
+```c
 typedef struct IInputSwitchCallbackUpdateData
 {
     DWORD dwID; // OK
@@ -666,7 +666,7 @@ So, back to `explorer.exe`, how do we make it load the Windows 10 switcher inste
 
 Well, it is, but if we look at the disassembly:
 
-```
+```asm
 .text:000000014013B21E                 call    cs:__imp_CoCreateInstance
 .text:000000014013B225                 nop     dword ptr [rax+rax+00h]
 .text:000000014013B22A                 mov     edi, eax
@@ -684,7 +684,7 @@ Maybe patching the virtual table of the COM interface could be a solution, but i
 
 For this, I instead obted to hack it away, by observing that `edx` is never changed beside that `xor edx, edx`. So, I just have to neuter that, and then set it myself and immediatly return from my `CoCreateInstance` hook. Like this:
 
-```
+```c
 //globals:
 char mov_edx_val[6] = { 0xBA, 0x00, 0x00, 0x00, 0x00, 0xC3 };
 char* ep_pf = NULL;
@@ -723,8 +723,6 @@ The result?
 ![image](https://user-images.githubusercontent.com/6503598/142456688-87640438-7812-467f-ad1b-00e1db8a594d.png)
 
 ### Conclusion
-
-Life's beautiful =))) 
 
 Not the most beautiful patches in the world, but they work out rather nicely. Quite some stuff has been achieved with the limited resources available at our disposal. Of course, Microsoft fixing the interface would still be the preferable option, like, in some cases, it only takes 2 bytes give or take, but they chose to deliver a label-less taskbar instead, that's simply a productivity nightmare. Oh, well... at least [ExplorerPatcher](https://github.com/valinet/ExplorerPatcher) exists.
 
