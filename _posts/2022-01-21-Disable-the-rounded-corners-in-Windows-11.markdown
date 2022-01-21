@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Disable the rounded corners in Windows 11"
-date:   2021-01-21 00:00:00 +0000
+date:   2021-01-20 00:00:00 +0000
 categories: 
 excerpt: "This is another article related to ExplorerPatcher and Windows 11. This time, I wanted to take a more in-depth look at the changes in the compositor shipped with Windows 11 (the "Desktop Window Manager"). In this article, we learn how to disable the rounded corners in dwm.exe."
 ---
