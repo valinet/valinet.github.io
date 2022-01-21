@@ -88,9 +88,9 @@ For the first bullet point, let's look at this part of the `if` statement: `*((_
 
   Okay, so what is `CDWMDXGIEnumeration::IsWarpAdapterLuid`. From its body (and name), we see that it tries to determine whether the graphics adapter (used) is the WARP (software rendered) adapter. This is plenty obvious as well once we take a look at this `if` statement specifically: `if ( a2 == *(_QWORD *)(v5 + 336) && *(_DWORD *)(v5 + 296) == 5140 && *(_DWORD *)(v5 + 300) == 140 )` - `5140` is `0x1414` in hex, and `140` is `0x8c`. According to [this](https://docs.microsoft.com/en-us/windows/win32/direct3ddxgi/d3d10-graphics-programming-guide-dxgi#new-info-about-enumerating-adapters-for-windows-8), those IDs corespond to the "Microsoft Basic Render Driver", which is basically the software-based graphics adapter that is used as a fallback when graphics drivers for the real adapter are not installed etc. Why is this important? Well, we can observe that on such a setup, the rounded corners are disabled. So, it has to be that in such scenarios,`*((_BYTE *)CDesktopManager::s_pDesktopManagerInstance + 27)` is set to `true`, as the adapter used was the software one, and then ``!*((_BYTE *)CDesktopManager::s_pDesktopManagerInstance + 28)` is still 1 so the main branch is taken, the function returns `1` and rounded corners are disabled. Well, that means we are onto something: if we somehow make `!*((_BYTE *)CDesktopManager::s_pDesktopManagerInstance + 28)` return `false`, we can enable rounded corners when the software display adapter is used. But that's pretty easy: all we have to do is to set `ForceEffectMode` in the registry to `2` and test it out:
 
-  ![image](https://user-images.githubusercontent.com/6503598/150552558-52b10a81-e5c5-40a8-a81d-f99b8c51c8e9.png)
+  ![image](https://user-images.githubusercontent.com/6503598/150562231-d0b71810-e7f8-461c-b8e6-c2710153475d.png)
 
-  So, the opposite of what we want works. Great start =))
+  So, the opposite of what we want works (including context menus). Great start =))
 
 * `*((int *)CDesktopManager::s_pDesktopManagerInstance + 8) >= 2`
 
@@ -171,6 +171,6 @@ Naturally, the way to go for this is to create a service, as that always runs as
 
 An example implementation is [here (ep_dwm)](https://github.com/valinet/ep_dwm). it can be compiled as a library and then called from your own application, for example.
 
-![image](https://user-images.githubusercontent.com/6503598/150559617-c8a87dee-2489-4490-bc0f-499c7c32f837.png)
+![image](https://user-images.githubusercontent.com/6503598/150561707-3c6eeae2-298a-4512-8a35-9de33d49b888.png)
 
 That's it! The functionality has been incorporated in the latest ExplorerPatcher, version 22000.434.41.10. Hopefully it will serve you well.
