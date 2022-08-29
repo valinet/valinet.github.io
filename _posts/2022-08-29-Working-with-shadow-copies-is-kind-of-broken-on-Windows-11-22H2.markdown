@@ -248,7 +248,7 @@ NTSTATUS MyNtFsControlFile(
 
 In fact, if I run File Explorer under the built-in Administrator account (necessary so that calls using the VSS API work, specifically `CreateVssBackupComponents`) and replace IAT patch the call to `NtFsControlFile` with the function above (of course, I do this by modifying ExplorerPatcher), I do indeed get the snapshots to show under the "Previous versions" tab, but only if I set `ShowAllPreviousVersions` (DWORD) to `1` under `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer`:
 
-![Previous Versions tab with ShowAllPreviousVersions](https://user-images.githubusercontent.com/6503598/187242510-6954d8e0-0860-4262-8a3e-dc03f712f616.png)
+![Previous Versions tab with ShowAllPreviousVersions](https://user-images.githubusercontent.com/6503598/187245754-3884a4c9-ef70-4f62-95a0-3405a0c7be51.png)
 
 What is `ShowAllPreviousVersions`? It's a setting that tells the window whether to display all snapshots or filter only the ones that actually contain the file that we are querying. The check is performed in `twext.dll` in `BuildSnapshots`:
 
@@ -261,7 +261,7 @@ What is `ShowAllPreviousVersions`? It's a setting that tells the window whether 
 
 Okay, so it seems that this solves the problem. Well, no really, since trying to open files that are clearly in the snapshot we have selected produces an error (which also seems to read from some illegal buffer, as signified by the Chinese characters, but that's a bug for some other time):
 
-![Error when opening the file from Previous Versions tab](https://user-images.githubusercontent.com/6503598/187239743-56bb5471-62ce-4e6c-9aa7-4a7ff788fa7b.png)
+![Error when opening the file from Previous Versions tab](https://user-images.githubusercontent.com/6503598/187246098-f9c98125-f922-4c27-8c63-f11800681a25.png)
 
 Looking a bit on the code, after the call to `QuerySnapshotNames`, there are calls to `BuildSnapshots -> TestSnapshot -> GetFileAttributesExW`. The first parameter to `GetFileAttributesExW` is a UNC-like path that references the snapshot we are looking into for the file, things like: `\\localhost\C$\@GMT-2022.08.29-14.29.52\Users\Administrator\Downloads\ep_setup.exe`.
 
