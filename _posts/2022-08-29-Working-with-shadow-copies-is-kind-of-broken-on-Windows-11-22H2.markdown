@@ -1,12 +1,12 @@
 ---
 layout: post
 title:  "Working with shadow copies is kind of broken on Windows 11 22H2"
-date:   2022-08-28 00:00:00 +0000
+date:   2022-08-29 00:00:00 +0000
 categories: 
 excerpt: "As a continuation of my previous article on shadow copies in Windows, I investigate how they behave under 22621+-based builds of Windows 11 (version 22H2, yet to be released)."
 ---
 
-As a continuation of my previous article on shadow copies in Windows, I investigate how they behave under 22621+-based builds of Windows 11 (version 22H2, yet to be released).
+As a continuation of my [previous article](https://valinet.ro/2022/08/28/Shadow-copies-under-Windows-10-and-11.html) on shadow copies in Windows, I investigate how they behave under 22621+-based builds of Windows 11 (version 22H2, yet to be released).
 
 Under build 22622, the Previous Versions tab displays no snapshots:
 
@@ -14,7 +14,7 @@ Under build 22622, the Previous Versions tab displays no snapshots:
 
 Attaching with a debugger and looking on the disassembly of `twext.dll`, the component that hosts the "Previous Versions" tab, I found out that the following call to `NtFsControlFile` errors out:
 
-```
+```cpp
 __int64 __fastcall IssueSnapshotControl(__int64 a1, _DWORD *a2, unsigned int a3)
 {
   HANDLE EventW; // rsi
@@ -36,7 +36,7 @@ __int64 __fastcall IssueSnapshotControl(__int64 a1, _DWORD *a2, unsigned int a3)
 
 This is called when the window tries to enumerate all snapshots in the system. The call stack looks something like this:
 
-```
+```cpp
 CTimewarpResultsFolder::EnumSnapshots
 CTimewarpResultsFolder::_AddSnapshotShellItems
 SHEnumSnapshotsForPath
@@ -53,7 +53,7 @@ At first, I thought that the device call no longer supports being called with in
 
 This being said, I quickly scratched out a project in Visual Studio where I set a large enough buffer. Unfortunately, this still did not produce the expected result. The call still said there are no snapshots available despite being offered enough space in the buffer to copy the names there.
 
-```
+```cpp
     HRESULT hr = S_OK;
     DWORD sz = sizeof(L"@GMT-YYYY.MM.DD-HH.MM.SS");
 
@@ -117,7 +117,7 @@ This being said, I quickly scratched out a project in Visual Studio where I set 
 
 Okay, so maybe the entire call is broken altogether. Indeed, if we craft a replacement for `NtFsControlFile` when `FsControlCode` set to `FSCTL_GET_SHADOW_COPY_DATA` that uses the Volume Shadow Service APIs instead of this device IO control call and run the program as administrator, we indeed get the snapshots. It is interesting to note that on my machine running Windows 11 22000.856 this method returned all the snapshots that both `vssadmin list shadows` and [ShadowCopyView](https://www.nirsoft.net/utils/shadow_copy_view.html) listed, while the original `NtFsControlFile` call returned less snapshots, for some reasons. I compared the returned snapshots, but couldn't find anything relevant regarding the missing ones.
 
-```
+```cpp
 NTSTATUS MyNtFsControlFile(
     HANDLE           FileHandle,
     HANDLE           Event,
@@ -252,7 +252,7 @@ In fact, if I run File Explorer under the built-in Administrator account (necess
 
 What is `ShowAllPreviousVersions`? It's a setting that tells the window whether to display all snapshots or filter only the ones that actually contain the file that we are querying. The check is performed in `twext.dll` in `BuildSnapshots`:
 
-```
+```cpp
     if ( (unsigned int)SHGetRestriction(
                          L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
                          0i64,

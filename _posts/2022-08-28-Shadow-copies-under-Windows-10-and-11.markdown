@@ -23,7 +23,7 @@ But as I have discovered, snapshots taken using the volume shadow copy service a
 
 ![Previous versions tab in the Properties sheet](https://user-images.githubusercontent.com/6503598/187086678-e8decbec-33d0-4058-b0a8-259dd29636b3.png)
 
-Well, yeah. Unfortunately, due to another idiotic Microsoft move, they have completely removed the UI for configuring shadow copies from client Windows (it's still available in server SKUs). But the functionality is still there, they just don't deem it important, for some stupid reason, for regular users.
+Well, yeah. Unfortunately, due to another questionable Microsoft move, they have completely removed the UI for configuring shadow copies from client Windows (it's still available in server SKUs). But the functionality is still there, they just don't deem it important, for some reason, for regular users.
 
 So, becuase we have no UI for configuring a schedule for snapshots, I have resorted to setting up a scheduled task that runs the following command every 15 minutes:
 
@@ -59,7 +59,7 @@ vssadmin List Shadows
 
 Alternatively, you can use a full featured third party GUI like [ShadowExplorer](https://www.shadowexplorer.com/downloads.html) or [ShadowCopyView](https://www.nirsoft.net/utils/shadow_copy_view.html).
 
-Do note that under Windows 11 22H2-based builds (22621+), this functionality seems to be broken altogether; read more about my investigation regarding this [here].
+Do note that under Windows 11 22H2-based builds (22621+), this functionality seems to be broken altogether; read more about my investigation regarding this [here](https://valinet.ro/2022/08/28/Working-with-shadow-copies-is-kind-of-broken-on-Windows-11-22H2.html).
 
 ### Restore an entire drive
 
@@ -106,7 +106,7 @@ Revert Shadow         - Revert a volume to a shadow copy
 Query Reverts         - Query the progress of in-progress revert operations.
 ```
 
-Again, why they decided to do this is beyond my understanding, probably some stupid business decision. Fortunately, as described [in this Reddit post](https://www.reddit.com/r/sysadmin/comments/w7fwgp/restore_shadow_copies_from_cli/), you can trick `vssadmin` into thinking it's running under a server SKU by using `WinPrivCmd`, a redirector for some API calls programs use to find various information from Windows, including whether the program runs under a client or server SKU. To get the server `vssadmin`, run this:
+Again, why they decided to do this is beyond my understanding, probably some business decision. Fortunately, as described [in this Reddit post](https://www.reddit.com/r/sysadmin/comments/w7fwgp/restore_shadow_copies_from_cli/), you can trick `vssadmin` into thinking it's running under a server SKU by using `WinPrivCmd`, a redirector for some API calls programs use to find various information from Windows, including whether the program runs under a client or server SKU. To get the server `vssadmin`, run this:
 
 ```
 winprivcmd /ServerEdition vssadmin /?
@@ -125,7 +125,7 @@ First of all, you can't restore a snapshot on the system drive from an online sy
 
 Then, there are a couple of pre-requisties for the revert operation to work. I skipped the documentation and looked directly on the disassembly of the `VSSVC.exe` executale (the Volume Shadow Copy service):
 
-```
+```cpp
 bool __fastcall CVssCoordinator::IsRevertableVolume(CVssCoordinator *this, const unsigned __int16 *a2)
 {
   CVssCoordinator *v3; // rcx
