@@ -174,3 +174,5 @@ An example implementation is [here (ep_dwm)](https://github.com/valinet/ep_dwm).
 ![image](https://user-images.githubusercontent.com/6503598/150561707-3c6eeae2-298a-4512-8a35-9de33d49b888.png)
 
 That's it! The functionality has been incorporated in the latest ExplorerPatcher, version 22000.434.41.10. Hopefully it will serve you well.
+
+Update (29/08/2022): I also recommend checking out [this project](https://github.com/oberrich/win11-toggle-rounded-corners) on GitHub, which adopts a similar srategy but patches a flag inside the `CDesktopManager` singleton from `uDWM` to achieve a similar result. Hopefully, one day, I will have the time and maybe integrate this into ExplorerPatcher.

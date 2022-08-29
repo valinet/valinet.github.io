@@ -59,7 +59,7 @@ vssadmin List Shadows
 
 Alternatively, you can use a full featured third party GUI like [ShadowExplorer](https://www.shadowexplorer.com/downloads.html) or [ShadowCopyView](https://www.nirsoft.net/utils/shadow_copy_view.html).
 
-Do note that under Windows 11 22H2-based builds (22621+), this functionality seems to be broken altogether; read more about my investigation regarding this [here](https://valinet.ro/2022/08/28/Working-with-shadow-copies-is-kind-of-broken-on-Windows-11-22H2.html).
+Do note that under Windows 11 22H2-based builds (22621+), this functionality seems to be broken altogether; read more about my investigation regarding this [here](https://valinet.ro/2022/08/29/Working-with-shadow-copies-is-kind-of-broken-on-Windows-11-22H2.html).
 
 ### Restore an entire drive
 
