@@ -69,13 +69,13 @@ This being said, I quickly scratched out a project in Visual Studio where I set 
         printf("CreateEventW: 0x%x\n", GetLastError());
         return 0;
     }
-	typedef struct _IO_STATUS_BLOCK {
-		union {
-			NTSTATUS Status;
-			PVOID    Pointer;
-		};
-		ULONG_PTR Information;
-	} IO_STATUS_BLOCK, * PIO_STATUS_BLOCK;
+    typedef struct _IO_STATUS_BLOCK {
+        union {
+            NTSTATUS Status;
+            PVOID    Pointer;
+        };
+        ULONG_PTR Information;
+    } IO_STATUS_BLOCK, * PIO_STATUS_BLOCK;
     NTSTATUS(*NtFsControlFile)(
         HANDLE           FileHandle,
         HANDLE           Event,
@@ -118,6 +118,169 @@ This being said, I quickly scratched out a project in Visual Studio where I set 
 Okay, so maybe the entire call is broken altogether. Indeed, if we craft a replacement for `NtFsControlFile` when `FsControlCode` set to `FSCTL_GET_SHADOW_COPY_DATA` that uses the Volume Shadow Service APIs instead of this device IO control call and run the program as administrator, we indeed get the snapshots. It is interesting to note that on my machine running Windows 11 22000.856 this method returned all the snapshots that both `vssadmin list shadows` and [ShadowCopyView](https://www.nirsoft.net/utils/shadow_copy_view.html) listed, while the original `NtFsControlFile` call returned less snapshots, for some reasons. I compared the returned snapshots, but couldn't find anything relevant regarding the missing ones.
 
 ```cpp
+#include <initguid.h>
+#include <vss.h>
+#include <Windows.h>
+#include <objbase.h>
+
+typedef interface IVssBackupComponents IVssBackupComponents;
+
+typedef struct IVssBackupComponentsVtbl
+{
+    BEGIN_INTERFACE
+
+    HRESULT(STDMETHODCALLTYPE* QueryInterface)(
+        __RPC__in IVssBackupComponents* This,
+        /* [in] */ __RPC__in REFIID riid,
+        /* [annotation][iid_is][out] */
+        _COM_Outptr_  void** ppvObject);
+
+    ULONG(STDMETHODCALLTYPE* AddRef)(
+        __RPC__in IVssBackupComponents* This);
+
+    ULONG(STDMETHODCALLTYPE* Release)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* GetWriterComponentsCount)(
+        __RPC__in IVssBackupComponents* This,
+        /* [out] */ _Out_ UINT* pcComponents);
+
+    HRESULT(STDMETHODCALLTYPE* GetWriterComponents)(
+        __RPC__in IVssBackupComponents* This,
+        /* [in] */ _In_ UINT iWriter,
+        /* [out] */ _Out_ void** ppWriter);
+
+    HRESULT(STDMETHODCALLTYPE* InitializeForBackup)(
+        __RPC__in IVssBackupComponents* This,
+        /* [in_opt] */ _In_opt_ BSTR bstrXML);
+
+    HRESULT(STDMETHODCALLTYPE* g6)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g7)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g8)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g9)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g10)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g11)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g12)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g13)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g14)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g15)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g16)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g17)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g18)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g19)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g20)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g21)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g22)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g23)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g24)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g25)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g26)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g27)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g28)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g29)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g30)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g31)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g32)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g33)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g34)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* SetContext)(
+        __RPC__in IVssBackupComponents* This,
+        _In_ LONG lContext);
+
+    HRESULT(STDMETHODCALLTYPE* g36)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g37)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g38)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g39)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g40)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g41)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* g42)(
+        __RPC__in IVssBackupComponents* This);
+
+    HRESULT(STDMETHODCALLTYPE* Query)(
+        __RPC__in IVssBackupComponents* This,
+        _In_ REFIID        QueriedObjectId,
+        _In_ INT64    eQueriedObjectType,
+        _In_ INT64    eReturnedObjectsType,
+        _In_ void** ppEnum);
+
+    END_INTERFACE
+} IVssBackupComponentsVtbl;
+
+interface IVssBackupComponents // : IUnknown
+{
+    CONST_VTBL struct IVssBackupComponentsVtbl* lpVtbl;
+};
+
 NTSTATUS MyNtFsControlFile(
     HANDLE           FileHandle,
     HANDLE           Event,
@@ -161,6 +324,7 @@ NTSTATUS MyNtFsControlFile(
 
         FARPROC CreateVssBackupComponents = GetProcAddress(hVssapi, "?CreateVssBackupComponents@@YGJPAPAVIVssBackupComponents@@@Z");
         if (!CreateVssBackupComponents) CreateVssBackupComponents = GetProcAddress(hVssapi, "?CreateVssBackupComponents@@YAJPEAPEAVIVssBackupComponents@@@Z");
+        if (!CreateVssBackupComponents) CreateVssBackupComponents = GetProcAddress(hVssapi, (LPCSTR)14);
         if (!CreateVssBackupComponents) return STATUS_INSUFFICIENT_RESOURCES;
 
         FARPROC VssFreeSnapshotProperties = GetProcAddress(hVssapi, "VssFreeSnapshotProperties");
