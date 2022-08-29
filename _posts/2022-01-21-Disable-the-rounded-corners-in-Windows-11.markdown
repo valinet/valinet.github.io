@@ -175,4 +175,4 @@ An example implementation is [here (ep_dwm)](https://github.com/valinet/ep_dwm).
 
 That's it! The functionality has been incorporated in the latest ExplorerPatcher, version 22000.434.41.10. Hopefully it will serve you well.
 
-Update (29/08/2022): I also recommend checking out [this project](https://github.com/oberrich/win11-toggle-rounded-corners) on GitHub, which adopts a similar srategy but patches a flag inside the `CDesktopManager` singleton from `uDWM` to achieve a similar result. Hopefully, one day, I will have the time and maybe integrate this into ExplorerPatcher.
+Update (29/08/2022): I also recommend checking out [this project](https://github.com/oberrich/win11-toggle-rounded-corners) on GitHub. It basically patches `CDesktopManager::s_pDesktopManagerInstance + 28` to be a `1`, with all the quirks described above (context menus and some windows, like the UAC prompt, do not have shadows). Still, it is an alternative to my strategy here. Hopefully, one day, I will have the time and maybe integrate this into ExplorerPatcher as an option. 
