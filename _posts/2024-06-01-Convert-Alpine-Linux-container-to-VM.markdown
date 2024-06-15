@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Convert Alpine Linux containers to VMs"
-date:   2023-06-01 00:00:00 +0000
+date:   2024-06-01 00:00:00 +0000
 categories: 
 excerpt: "Lately I have decided to migrate away from Proxmox containers to full blown virtual machines, due to reasons like the inability of containers to host Docker inside the root volume when using zfs, so having to resort to all kinds of shenanigans, like storing `/var/lib/docker` in a separate xfs volume which nukes the built-in high availability, failover and hyperconvergence (using Ceph) features for that container, plus wanting to make the setup more portable and less dependant on the underlaying OS."
 ---
@@ -10,7 +10,7 @@ Lately I have decided to migrate away from Proxmox containers to full blown virt
 
 Here're the steps, with little comments where relevant:
 
-1. Create a new VM with the desired features in Proxmox. Attach Arch Linux or any Linux live CD to it. make sure to add a serial port to it, so we can later enable xterm.js on it (allows copy/paste), in addition to the noVNC console.
+1. Create a new VM with the desired features in Proxmox. Attach Arch Linux or any Linux live CD to it. Make sure to add a serial port to it, so we can later enable xterm.js on it (allows copy/paste), in addition to the noVNC console.
 
 2. Enable ssh (and allow root authentication with password) in the Alpine Linux CT, install rsync on it and kill all running Dockers/services inside it.
 
@@ -84,7 +84,7 @@ linux /boot/vmlinuz-lts root=PARTUUID=84035c78-3729-4cc9-b1c5-d34d1189cefd ro
 Replace it with:
 
 ```
-linux /boot/vmlinuz-lts root=/dev/sda2 ro modules=ext4 rootfstype=ext4 console=tty0 console=ttyS0,115200 earlyprintk=ttyS0,115200 consoleblank=0
+linux /boot/vmlinuz-lts root=/dev/sda2 ro modules=ext4 rootfstype=ext4 console=tty0 console=ttyS0,115200
 ```
 
 12. Some bootstraper scripts/templates for this containers set the system type to `lxc`. This has the effect of skipping various things at startup that are not required in a container environment, like checking the disks for errors, which is needed for remounting `/` as read write. Without undoing this, you will have problems booting Alpine Linux because the root file system will be read only. I have spent a ton of time figuring this out. You need to edit the `/etc/rc.conf` file and comment out `rc_sys="lxc"`.
@@ -123,9 +123,9 @@ You can display the status of all services using `rc-update show -v | less`.
 ### References
 
 1. [How to make mini rootfs bootable? : r/AlpineLinux](https://www.reddit.com/r/AlpineLinux/comments/13ochmy/how_to_make_mini_rootfs_bootable/)
-2. [Convert Proxmox LXC to a regular VM | Proxmox Support Forum](https://forum.proxmox.com/threads/convert-proxmox-lxc-to-a-regular-vm.141687/)
-3. [Migrate LXC to KVM | Proxmox Support Forum](https://forum.proxmox.com/threads/migrate-lxc-to-kvm.56298/)
+2. [Convert Proxmox LXC to a regular VM - Proxmox Support Forum](https://forum.proxmox.com/threads/convert-proxmox-lxc-to-a-regular-vm.141687/)
+3. [Migrate LXC to KVM - Proxmox Support Forum](https://forum.proxmox.com/threads/migrate-lxc-to-kvm.56298/)
 4. [Network configuration - ArchWiki](https://wiki.archlinux.org/title/Network_configuration)
-5. [Proxmox 8.1 / ZFS 2.2: Docker in Privileged Container | Proxmox Support Forum](https://forum.proxmox.com/threads/proxmox-8-1-zfs-2-2-docker-in-privileged-container.137128/)
+5. [Proxmox 8.1 / ZFS 2.2: Docker in Privileged Container - Proxmox Support Forum](https://forum.proxmox.com/threads/proxmox-8-1-zfs-2-2-docker-in-privileged-container.137128/)
 6. [SOLVED grub-install: error: unknown filesystem](https://www.linuxquestions.org/questions/slackware-14/grub-install-error-unknown-filesystem-4175723528/)
 7. [ubuntu - How to best clone a running system to a new harddisk using rsync? - Super User](https://superuser.com/questions/709176/how-to-best-clone-a-running-system-to-a-new-harddisk-using-rsync)
