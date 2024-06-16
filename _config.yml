@@ -21,8 +21,8 @@ author: Valentin Radu
 email: valentingabrielradu@gmail.com
 legal: '&copy; 2006-2024 VALINET Solutions SRL. All rights reserved.'
 description_long: >- # this means to ignore newlines until "baseurl:"
-  Engineering and hacking. <a href="/about">Valentin Radu</a> talks here. 
-  valinet6l6tq6d5yohaa6gdsf2ho4qcqcxyj2nahp5kd4z7nsa6ycdqd.onion
+  <em>Personal web space of <a href="/about">Valentin Radu</a>, talking about engineering and hacking. Also available at 
+  valinet6l6tq6d5yohaa6gdsf2ho4qcqcxyj2nahp5kd4z7nsa6ycdqd.onion</em>
 baseurl: "/" # the subpath of your site, e.g. /blog
 url: "https://valinet.ro" # the base hostname & protocol for your site, e.g. http://example.com
 github_username: valinet
