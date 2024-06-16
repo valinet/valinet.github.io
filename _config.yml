@@ -14,18 +14,15 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: valinet
-description: Advanced computer projects
+description: Engineering and hacking
 seo_paginator_message: "%<current>s / %<total>s | "
-name: Valentin-Gabriel Radu
-author: Valentin-Gabriel Radu
+name: Valentin Radu
+author: Valentin Radu
 email: valentingabrielradu@gmail.com
 legal: '&copy; 2006-2024 VALINET Solutions SRL. All rights reserved.'
 description_long: >- # this means to ignore newlines until "baseurl:"
-  My name is Valentin-Gabriel Radu and I am an engineer that's passionate about 
-  computers, embedded devices, software and hacking. I created this web site 
-  so that I can share my knowledge on various topics with the world, exchange
-  ideas, and receieve feedback. Read more about who I am 
-  <a href="/about">here</a>.
+  Engineering and hacking. <a href="/about">Valentin Radu</a> talks here. 
+  valinet6l6tq6d5yohaa6gdsf2ho4qcqcxyj2nahp5kd4z7nsa6ycdqd.onion
 baseurl: "/" # the subpath of your site, e.g. /blog
 url: "https://valinet.ro" # the base hostname & protocol for your site, e.g. http://example.com
 github_username: valinet

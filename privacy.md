@@ -43,7 +43,7 @@ Below, we describe every setting (*cookie*) the application may request to set a
 
 ### First party
 
-* Light/dark theme preference. By default, this preference is inferred from settings in your browser. You can also override this preference, in which case we will set a cookie that will remember this preference. Both of these settings cannot be used to personally identify you, so the application does not prompt you before setting/accessing the information.
+* Light/dark theme preference. By default, this preference is inferred from settings in your browser. You can also override this preference, in which case we will set a cookie that will remember this preference. This setting cannot be used to personally identify you, so the application does not prompt you before setting/accessing the information.
 
 ### Third party
 
