@@ -26,7 +26,7 @@ This is done using the [devicetree](https://en.wikipedia.org/wiki/Devicetree). T
 
 # 2. Reserve some CMA
 
-[Continous Memory Allocation](https://stackoverflow.com/questions/56415606/why-is-contiguous-memory-allocation-is-required-in-linux) is a feature where the kernel reserves some memory area for hardware devices that need support for physical contigous memory. It can be enabled using the device tree or the `cma=128MB` boot flag (that one, for example, instructs the kernel to reserve 128MB at the end of the physical memory space for CMA).
+[Contiguous Memory Allocation](https://stackoverflow.com/questions/56415606/why-is-contiguous-memory-allocation-is-required-in-linux) is a feature where the kernel reserves some memory area for hardware devices that need support for physical contigous memory. It can be enabled using the device tree or the `cma=128MB` boot flag (that one, for example, instructs the kernel to reserve 128MB at the end of the physical memory space for CMA).
 
 The workflow then would be to write a kernel module that requests the amount of CMA memory you want from the kernel, then configure the hardware with the physical address of that. And this approach works just fine. The problem is, you have to write a kernel module, implement communication from the user land with it - probably some `ioctl` where you tell the driver how much memory to request from the kernel and via which it tells you back the physical address it got. Certainly doable on a system we fully control, but do we really have to bother with a writing a driver and risk introducing instability in the one area where it hurts the most?
 
