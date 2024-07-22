@@ -3,7 +3,7 @@ layout: post
 title:  "Access valinet.ro over the Tor network"
 date:   2024-06-16 00:00:00 +0000
 categories: 
-excerpt: "Lately I have decided to migrate away from Proxmox containers to full blown virtual machines, due to reasons like the inability of containers to host Docker inside the root volume when using zfs, so having to resort to all kinds of shenanigans, like storing `/var/lib/docker` in a separate xfs volume which nukes the built-in high availability, failover and hyperconvergence (using Ceph) features for that container, plus wanting to make the setup more portable and less dependant on the underlaying OS."
+excerpt: "It is my pleasure to announce that, for almost 2 weeks now, valinet.ro is available over the Tor network as well, at https://valinet6l6tq6d5yohaa6gdsf2ho4qcqcxyj2nahp5kd4z7nsa6ycdqd.onion/. I have presented this setup in an assignment for one of the classes I take in uni, so here's the write-up that I have made for it."
 ---
 
 It is my pleasure to announce that, for almost 2 weeks now, valinet.ro is available over the Tor network as well, at [https://valinet6l6tq6d5yohaa6gdsf2ho4qcqcxyj2nahp5kd4z7nsa6ycdqd.onion/](https://valinet6l6tq6d5yohaa6gdsf2ho4qcqcxyj2nahp5kd4z7nsa6ycdqd.onion/). I have presented this setup in an assignment for one of the classes I take in uni, so here's the write-up that I have made for it.
