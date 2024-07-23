@@ -20,11 +20,11 @@ Despite that, Linux is not really thought out with that expectation in mind - it
 
 At the moment, I know three solutions, and I will go over each of them and tell you why I picked the last one.
 
-# 1. Limit the RAM the OS 'sees'
+## 1. Limit the RAM the OS 'sees'
 
 This is done using the [devicetree](https://en.wikipedia.org/wiki/Devicetree). The hardware is then free to write data there without fearing it is going to hurt something in the software/CPU side. The problem here is that the OS cannot ever access that memory, but this technique works when the hardware needs to buffer data for itself and the CPU doesn't really need access to it.
 
-# 2. Reserve some CMA
+## 2. Reserve some CMA
 
 [Contiguous Memory Allocation](https://stackoverflow.com/questions/56415606/why-is-contiguous-memory-allocation-is-required-in-linux) is a feature where the kernel reserves some memory area for hardware devices that need support for physical contigous memory. It can be enabled using the device tree or the `cma=128MB` boot flag (that one, for example, instructs the kernel to reserve 128MB at the end of the physical memory space for CMA).
 
@@ -45,7 +45,7 @@ Pretty simple, so what's wrong with it? 2 main things I'd say. Firstly, maybe yo
 
 You can still hack around this: you could query from the user land and find out how much CMA the kernel handed out to requesting parties. It is allocated in number of pages from the beginning. There is no direct syscall to work with the CMA from the user space, as far as I know, since one's not really supposed to, but there is actually [a `debugfs` interface](https://stackoverflow.com/questions/65202674/finding-out-whats-taking-up-the-cma-contiguous-memory-allocation-in-linux) which can tell you how much is used, but really... there is no guarantee some device won't request more. Sure, if you control the hardware and know about it as well, just work with some memory a bit further away from where you expect/see the requests finish at and 99.99% of the time you can get away with this. But it's... hacky. Ugly. We need something better.
 
-# 3. Properly reserve memory
+## 3. Properly reserve memory
 
 Specifically for this requirement outlines above, the kernel actually has a dedicated mechanism: reserved memory. It's configured using the device tree, where you introduce an entry that looks like this:
 
@@ -120,7 +120,7 @@ And each uio has a `name` file associated which contains the name you specified 
 reserved_memory1
 ```
 
-# Useful links
+## Useful links
 
 [Linux Reserved Memory](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841683/Linux+Reserved+Memory)
 
